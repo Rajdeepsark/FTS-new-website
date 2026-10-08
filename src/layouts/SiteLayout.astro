@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import "lenis/dist/lenis.css";
 import SiteHeader from "../components/SiteHeader.astro";
 import FloatingNav from "../components/FloatingNav.astro";
 import Logo from "../components/Logo.astro";
@@ -40,5 +41,27 @@ const { title, description } = Astro.props;
       </div>
     </footer>
     <FloatingNav />
+
+    <script>
+      // Inertial smooth scrolling (Lenis). It moves the real window scroll, so
+      // scroll listeners and IntersectionObservers elsewhere keep working.
+      // Skipped when the visitor prefers reduced motion: native scrolling then.
+      import Lenis from "lenis";
+
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        const lenis = new Lenis({
+          lerp: 0.1,
+          wheelMultiplier: 1,
+          touchMultiplier: 1.5,
+          anchors: true,
+        });
+
+        const raf = (time: number) => {
+          lenis.raf(time);
+          requestAnimationFrame(raf);
+        };
+        requestAnimationFrame(raf);
+      }
+    </script>
   </body>
 </html>
