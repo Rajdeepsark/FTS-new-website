@@ -1,0 +1,36 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+---
+
+<SiteLayout
+  title="Contact"
+  description="Get in touch with Fieldnote Studio to talk about your next project."
+>
+  <section class="mx-auto grid max-w-7xl gap-12 px-6 py-20 sm:py-28 md:grid-cols-[1.1fr_0.9fr] lg:px-10">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-[0.18em] text-forest">Get in touch</p>
+      <h1 class="mt-4 text-5xl font-semibold leading-tight tracking-[-0.05em] sm:text-7xl">Tell us what you're <span class="text-forest">thinking.</span></h1>
+      <p class="mt-6 max-w-xl text-lg leading-8 text-muted">A first conversation is just that—a conversation. Share a little about what you need, and we'll take it from there.</p>
+      <a class="mt-9 inline-flex rounded-full bg-ink px-6 py-3 text-sm font-medium text-white transition hover:bg-forest" href="mailto:hello@fieldnote.studio?subject=Let%27s%20talk">
+        hello@fieldnote.studio <span class="ml-3" aria-hidden="true">↗</span>
+      </a>
+    </div>
+    <aside class="rounded-3xl bg-[#e8eddf] p-8 sm:p-10">
+      <h2 class="text-xl font-semibold">A few helpful details</h2>
+      <div class="mt-8 space-y-7">
+        <div>
+          <p class="text-sm font-medium text-muted">Currently booking</p>
+          <p class="mt-1">New projects for this season</p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-muted">Studio hours</p>
+          <p class="mt-1">Monday–Friday, 9am–5pm</p>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-muted">Good to know</p>
+          <p class="mt-1 leading-7">We usually reply within two working days. A few lines about your goals and timing are a great place to start.</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+</SiteLayout>

@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Avenir Next", Avenir, sans-serif;
+  --color-ink: #16251f;
+  --color-muted: #66736d;
+  --color-paper: #f7f8f4;
+  --color-leaf: #b8ef78;
+  --color-forest: #1e4a38;
+  --color-night: #0d0c0b;
+  --color-cream: #f2ebe3;
+}
+
+:root {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-paper);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  position: relative; /* containing block for the grain overlay below */
+}
+
+::selection {
+  color: var(--color-ink);
+  background: var(--color-leaf);
+}
+
+/* ---------------------------------------------------------------------------
+ * Film grain — the Figma "Noise" effect that sits on every section.
+ *   Mono · noise size 0.5 · density 100% · colour #F2EBE3 at 10%
+ *
+ * One overlay covers the whole document, so every section (current and future)
+ * gets the same grain without any per-component markup. Like a frame-level
+ * effect in Figma it paints above everything, including the header and the
+ * floating nav, but it ignores the pointer. The tile is a 256px SVG
+ * feTurbulence texture (rasterised at device resolution, so the grain stays
+ * one device pixel), tinted to #F2EBE3 with the alpha contrast stretched so
+ * every pixel carries a grain. Tune strength with --noise-opacity.
+ * ------------------------------------------------------------------------ */
+:root {
+  --noise-opacity: 0.1;
+  --noise-tile: 256px;
+}
+
+body::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: var(--noise-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.949 0 0 0 0 0.922 0 0 0 0 0.890 0 0 0 3 -1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: var(--noise-tile) var(--noise-tile);
+  background-repeat: repeat;
+}
+
+@media print {
+  body::after {
+    display: none;
+  }
+}

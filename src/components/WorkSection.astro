@@ -1,0 +1,66 @@
+---
+/**
+ * Homepage work section (the dark frame that follows the hero in Figma).
+ *
+ *   section    full viewport width · padding 120px 64px (16px sides on phones) · gap 64px · #0D0C0B
+ *              children aligned to the right edge of the padded area
+ *   heading    678px block at the right edge · padding 0 0 32px 24px · gap 12px
+ *              ( OUR )  Inter 500 · 14/14 · uppercase · #F2EBE3
+ *              title    Inter 400 · 48/120% · -0.03em · #F2EBE3 ("stunning frames" in the serif face)
+ *   rows       full content width · feature rows are one card,
+ *              pair rows are two equal cards with a 20px gap
+ *
+ * Project data lives in `src/data/projects.ts`; rows are derived from its order:
+ * every third entry (0, 3, 6, …) is a feature, the two after it form a pair.
+ */
+import { projects, type Project } from "../data/projects";
+import ProjectCard from "./ProjectCard.astro";
+
+type Row = { kind: "feature"; project: Project } | { kind: "pair"; left: Project; right: Project };
+
+const rows: Row[] = [];
+for (let i = 0; i < projects.length; ) {
+  if (i % 3 === 0 || i + 1 >= projects.length) {
+    rows.push({ kind: "feature", project: projects[i] });
+    i += 1;
+  } else {
+    rows.push({ kind: "pair", left: projects[i], right: projects[i + 1] });
+    i += 2;
+  }
+}
+---
+
+<section
+  id="work"
+  class="bg-night px-4 py-16 sm:px-16 sm:py-[120px]"
+  aria-labelledby="work-heading"
+  data-nav-tone="light"
+>
+  <div class="flex w-full flex-col items-end gap-10 sm:gap-16">
+    <div class="flex w-full max-w-[678px] flex-col gap-3 pb-4 sm:pb-8 lg:pl-6">
+      <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px] text-cream">( Our )</p>
+      <h2
+        id="work-heading"
+        class="max-w-[654px] text-[36px] font-normal leading-[120%] tracking-[-0.03em] text-cream sm:text-[48px]"
+      >
+        Unforgettable stories &amp;
+        <span class="font-serif text-[1.08em] leading-none">stunning frames</span>
+      </h2>
+    </div>
+
+    {
+      rows.map((row) =>
+        row.kind === "feature" ? (
+          <div class="w-full">
+            <ProjectCard project={row.project} variant="feature" />
+          </div>
+        ) : (
+          <div class="grid w-full gap-5 md:grid-cols-2">
+            <ProjectCard project={row.left} variant="image-first" />
+            <ProjectCard project={row.right} variant="caption-first" />
+          </div>
+        ),
+      )
+    }
+  </div>
+</section>

@@ -1,0 +1,44 @@
+---
+import "../styles/global.css";
+import SiteHeader from "../components/SiteHeader.astro";
+import FloatingNav from "../components/FloatingNav.astro";
+import Logo from "../components/Logo.astro";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f4f1ea" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif&display=swap"
+    />
+    <title>{title} · Flying Turtle Studio</title>
+  </head>
+  <body class="relative min-h-screen">
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="border-t border-ink/10">
+      <div class="mx-auto flex max-w-7xl flex-col gap-4 px-6 pb-32 pt-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between lg:px-10">
+        <a class="text-ink" href="/" aria-label="Flying Turtle Studio home"><Logo class="h-7 sm:h-7" /></a>
+        <p>Films and visuals for brands with something to say.</p>
+        <p>© {new Date().getFullYear()} Flying Turtle Studio</p>
+      </div>
+    </footer>
+    <FloatingNav />
+  </body>
+</html>

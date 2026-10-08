@@ -1,0 +1,24 @@
+---
+/**
+ * "[ 01 ]" label plus one-paragraph caption (Figma "Item": padding 24px, gap 16px).
+ *   label    Inter 500 · 14/14 · uppercase · 50% opacity
+ *   caption  Inter 400 · 20/150% · -0.03em (16px below the sm breakpoint)
+ */
+interface Props {
+  number: string;
+  description: string;
+  /** `white` for captions laid over a poster, `cream` (#F2EBE3) on the dark page. */
+  tone?: "cream" | "white";
+  class?: string;
+}
+
+const { number, description, tone = "cream", class: className = "" } = Astro.props;
+const color = tone === "white" ? "text-white" : "text-cream";
+---
+
+<div class:list={["flex flex-col gap-4 p-4 sm:p-6", className]}>
+  <p class:list={["text-[14px] font-medium uppercase leading-[14px] opacity-50", color]}>[ {number} ]</p>
+  <p class:list={["max-w-[692px] text-base leading-[150%] tracking-[-0.03em] sm:text-[20px]", color]}>
+    {description}
+  </p>
+</div>

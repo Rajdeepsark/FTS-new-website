@@ -1,0 +1,60 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+
+const services = [
+  {
+    number: "01",
+    title: "Strategy & story",
+    description: "Get clear on who you are, what you offer, and why it matters. We turn the big questions into a useful direction for everything that follows.",
+    items: ["Brand positioning", "Audience research", "Messaging & voice"],
+  },
+  {
+    number: "02",
+    title: "Identity & design",
+    description: "Build a distinctive, flexible visual identity that looks and feels like you—everywhere your people find you.",
+    items: ["Visual identity", "Art direction", "Design systems"],
+  },
+  {
+    number: "03",
+    title: "Websites & digital",
+    description: "Bring it all together in a fast, accessible website that is a pleasure to use and simple to grow.",
+    items: ["Website design", "Astro development", "Ongoing support"],
+  },
+];
+---
+
+<SiteLayout
+  title="Services"
+  description="Explore Fieldnote Studio's brand strategy, identity, website design, and development services."
+>
+  <section class="mx-auto max-w-7xl px-6 py-20 sm:py-28 lg:px-10">
+    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-forest">How we can help</p>
+    <div class="mt-4 flex flex-col gap-6 border-b border-ink/10 pb-10 sm:flex-row sm:items-end sm:justify-between">
+      <h1 class="max-w-3xl text-5xl font-semibold leading-tight tracking-[-0.05em] sm:text-7xl">The right things, <span class="text-forest">done well.</span></h1>
+      <p class="max-w-sm leading-7 text-muted">A flexible mix of thinking and making, shaped around the work you need to do.</p>
+    </div>
+    <div>
+      {services.map((service) => (
+        <article class="grid gap-5 border-b border-ink/10 py-9 md:grid-cols-[5rem_1fr_1fr] md:gap-8">
+          <p class="text-sm text-muted">{service.number}</p>
+          <div>
+            <h2 class="text-2xl font-semibold tracking-tight">{service.title}</h2>
+            <ul class="mt-5 space-y-2 text-sm text-muted">
+              {service.items.map((item) => <li>{item}</li>)}
+            </ul>
+          </div>
+          <p class="max-w-lg leading-7 text-muted">{service.description}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+  <section class="mx-auto max-w-7xl px-6 pb-20 lg:px-10">
+    <div class="flex flex-col items-start justify-between gap-6 rounded-3xl bg-[#e8eddf] p-8 sm:flex-row sm:items-center sm:p-12">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.18em] text-forest">Have a project in mind?</p>
+        <h2 class="mt-3 text-3xl font-semibold tracking-tight">Let's find the right first step.</h2>
+      </div>
+      <a class="shrink-0 rounded-full bg-ink px-6 py-3 text-sm font-medium text-white hover:bg-forest" href="/contact">Start a conversation <span aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+</SiteLayout>

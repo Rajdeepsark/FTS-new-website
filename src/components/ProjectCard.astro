@@ -1,0 +1,93 @@
+---
+/**
+ * One project poster with its centred action pill and caption.
+ *
+ *   feature        full-width 1312 × 697 poster, caption laid over the bottom-left
+ *                  (below the poster on small screens), "View case study" pill
+ *   image-first    half-width card: 646 × 448 poster, caption underneath
+ *   caption-first  half-width card: caption on top, poster fills the rest of the row
+ *
+ * Pill (Figma "Header"): padding 16px 32px · radius 120px · white/10 fill and border ·
+ * Inter 400 · 13/14 · uppercase · white. "Watch" pills add a 16px play glyph.
+ */
+import type { Project } from "../data/projects";
+import ProjectCaption from "./ProjectCaption.astro";
+
+interface Props {
+  project: Project;
+  variant: "feature" | "image-first" | "caption-first";
+}
+
+const { project, variant } = Astro.props;
+const { number, title, description, action, href, image } = project;
+const label = action === "watch" ? "Watch" : "View case study";
+
+const posterShape = {
+  feature: "aspect-[4/3] md:aspect-[1312/697]",
+  "image-first": "aspect-[646/448]",
+  "caption-first": "aspect-[646/418] md:aspect-auto md:min-h-0 md:flex-1",
+}[variant];
+---
+
+<article class:list={["flex flex-col", variant === "feature" && "md:relative md:isolate", variant !== "feature" && "md:h-full"]}>
+  {variant === "caption-first" && <ProjectCaption number={number} description={description} />}
+
+  <div class:list={["relative isolate w-full overflow-hidden bg-[#1a1917]", posterShape]}>
+    {
+      image ? (
+        <img
+          class="absolute inset-0 size-full object-cover"
+          src={image.src}
+          alt={image.alt}
+          width={variant === "feature" ? 1312 : 646}
+          height={variant === "feature" ? 697 : 448}
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <div
+          class="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,#2a2825_0%,#151413_70%)]"
+          aria-hidden="true"
+        />
+      )
+    }
+
+    {
+      variant === "feature" && (
+        <div
+          class="absolute inset-x-0 bottom-0 hidden h-1/2 bg-gradient-to-t from-black/60 to-transparent md:block"
+          aria-hidden="true"
+        />
+      )
+    }
+
+    <a
+      class="absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-3 whitespace-nowrap rounded-[120px] border border-white/10 bg-white/10 px-6 py-3 text-[13px] font-normal uppercase leading-[14px] text-white backdrop-blur-md transition-colors hover:bg-white/20 sm:px-8 sm:py-4"
+      href={href}
+      aria-label={`${label}: ${title}`}
+    >
+      {
+        action === "watch" && (
+          <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M4.7 1.8C3.4 1 2.67 1.5 2.67 3v10c0 1.5.73 2 2.03 1.2l9-5.1c1.2-.7 1.2-1.5 0-2.2l-9-5.1Z" />
+          </svg>
+        )
+      }
+      <span class="pb-[5.71px] pt-[4.7px]">{label}</span>
+    </a>
+
+    {
+      variant === "feature" && (
+        <ProjectCaption
+          number={number}
+          description={description}
+          tone="white"
+          class="hidden md:absolute md:inset-x-0 md:bottom-0 md:flex"
+        />
+      )
+    }
+  </div>
+
+  {variant === "image-first" && <ProjectCaption number={number} description={description} />}
+  {variant === "feature" && <ProjectCaption number={number} description={description} class="md:hidden" />}
+</article>

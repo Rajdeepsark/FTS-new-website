@@ -1,0 +1,87 @@
+---
+/**
+ * Fixed bottom navigation — layer 2 ("navigation") of the Figma hero frame.
+ *
+ *   navigation  row · gap 6px · 32px from the bottom edge
+ *   Header      frosted pill · padding 16px 32px · radius 120px · bg white/10 · border white/10
+ *   List        gap 32px · Inter 400 · 13/14 · uppercase · white
+ *   Background  5 × 5 white dot at right -10px / top 5px after PROJECTS and ABOUT
+ *   Header      white pill · padding 16px 32px · radius 120px · "Talk to us" in #000
+ *
+ * The white Figma colours only read against the dark bottom of the hero image, so
+ * the nav watches any `[data-nav-tone]` section and switches to that tone while the
+ * section sits in the band the nav occupies. Everywhere else it falls back to ink
+ * text on a frosted white pill. Without JS it stays in the fallback tone.
+ */
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
+const links = [
+  { href: "/projects", label: "Projects", dot: true },
+  { href: "/about", label: "About", dot: true },
+  { href: "/contact", label: "Contact", dot: false },
+];
+---
+
+<nav
+  class="group pointer-events-none fixed inset-x-0 bottom-5 z-50 flex flex-wrap items-stretch justify-center gap-1.5 px-4 sm:bottom-8"
+  aria-label="Main navigation"
+  data-floating-nav
+  data-tone="dark"
+>
+  <ul
+    class="pointer-events-auto flex items-center gap-3 rounded-[120px] border border-white/50 bg-white/30 px-[18px] py-4 shadow-[0_10px_40px_-12px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-colors duration-300 group-data-[tone=light]:border-white/10 group-data-[tone=light]:bg-white/10 group-data-[tone=light]:shadow-none sm:gap-5 sm:px-[26px]"
+  >
+    {links.map(({ href, label, dot }) => (
+      <li class="relative isolate flex items-center">
+        <a
+          class:list={[
+            "relative rounded-full px-1.5 py-[5px] text-[13px] font-normal uppercase leading-[14px] text-ink transition-colors group-data-[tone=light]:text-white",
+            "hover:opacity-70",
+            currentPath === href && "underline decoration-current underline-offset-4",
+          ]}
+          href={href}
+          aria-current={currentPath === href ? "page" : undefined}
+        >
+          <span class="relative inline-block">
+            {label}
+            {dot && (
+              <span
+                class="absolute -right-[10px] top-0 z-0 size-[5px] rounded-full bg-ink transition-colors group-data-[tone=light]:bg-white"
+                aria-hidden="true"
+              />
+            )}
+          </span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <a
+    class="pointer-events-auto flex items-center justify-center self-stretch rounded-[120px] border border-white/10 bg-white px-8 py-4 text-[13px] font-normal uppercase leading-[14px] text-black shadow-[0_10px_40px_-12px_rgba(0,0,0,0.35)] transition-colors hover:bg-ink hover:text-white group-data-[tone=light]:shadow-none"
+    href="/contact"
+  >
+    Talk to us
+  </a>
+</nav>
+
+<script>
+  const nav = document.querySelector<HTMLElement>("[data-floating-nav]");
+  const zones = document.querySelectorAll<HTMLElement>("[data-nav-tone]");
+
+  if (nav && zones.length && "IntersectionObserver" in window) {
+    const active = new Set<HTMLElement>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const zone = entry.target as HTMLElement;
+          if (entry.isIntersecting) active.add(zone);
+          else active.delete(zone);
+        }
+        const [zone] = active;
+        nav.dataset.tone = zone?.dataset.navTone ?? "dark";
+      },
+      // Only the bottom ~14% of the viewport — the band the nav sits in — counts.
+      { rootMargin: "-86% 0px 0px 0px", threshold: 0 },
+    );
+    zones.forEach((zone) => observer.observe(zone));
+  }
+</script>

@@ -1,0 +1,80 @@
+---
+/**
+ * Homepage hero — layers 0 and 1 of the Figma "hero" frame (1440 × 821, padding 32px).
+ *
+ *   0. Gemini_Generated_Image … / upscale_image [Upscaled].png
+ *      1667.6 × 774.4 at 1440 wide, centred, anchored to the bottom,
+ *      mix-blend-mode: darken — its white areas dissolve into the page.
+ *   1. Container › Frame 1 (407px, gap 12px)
+ *      ( WE )   Inter 500 · 14/14 · uppercase · #000
+ *      Heading  Inter 400 · 48/120% · -0.03em · centred · #000
+ *               ("films and visuals." is set in the serif face per the design screenshot;
+ *               Figma's CSS export only carries the first text run's font)
+ *
+ * Layer 2 (the bottom navigation) is rendered site-wide by FloatingNav.astro;
+ * `data-nav-tone="light"` tells it to switch to the Figma white styling while it
+ * is over this section.
+ *
+ * Assets in `public/`:
+ *   hero-loop.mp4     the studio's 10 s flower-field fly-through loop, rendered at
+ *                     1920 × 1080 from the 720p master (Lanczos upscale, light
+ *                     sharpen, +35% saturation, H.264 CRF 23, no audio)
+ *   hero-loop.webm    same render as VP9 CRF 34, tried first because it is smaller
+ *   hero.jpg          first frame of the clip: poster while loading, and the only
+ *                     layer shown when the user prefers reduced motion
+ * The layer is a full-width band on the bottom 48% of the hero, on every screen
+ * size. That reproduces the framing the user approved in a 1070 × 1230 window,
+ * where the 16:9 clip naturally fills the width and the bottom half: the
+ * heading always sits in clear space above, and the flowers read at the same
+ * scale relative to the viewport everywhere. The clip is fitted with
+ * object-cover at 50% 65%, so on wide desktops (where the band is wider than
+ * 16:9) the top of the frame is cropped and the horizon and foreground flowers
+ * are kept; on phones the sides are cropped instead. A short top mask dissolves
+ * the sky into the page above the darken blend.
+ * To swap the clip: replace the three files, keep the names.
+ */
+---
+
+<section
+  class="relative isolate flex min-h-svh flex-col items-center overflow-hidden px-5 pb-32 pt-[116px] sm:px-8 sm:pt-[136px]"
+  aria-labelledby="hero-heading"
+  data-nav-tone="light"
+>
+  <div
+    class="pointer-events-none absolute inset-x-0 bottom-0 z-0 h-[48%] w-full select-none mix-blend-darken [mask-image:linear-gradient(to_bottom,transparent_0%,black_22%)]"
+    aria-hidden="true"
+  >
+    <img
+      class="absolute inset-0 size-full object-cover object-[50%_65%]"
+      src="/hero.jpg"
+      alt=""
+      width="1280"
+      height="720"
+      fetchpriority="high"
+      decoding="async"
+    />
+    <video
+      class="absolute inset-0 size-full object-cover object-[50%_65%] motion-reduce:hidden"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      poster="/hero.jpg"
+    >
+      <source src="/hero-loop.webm" type="video/webm" />
+      <source src="/hero-loop.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+  <div class="z-10 flex w-full max-w-[407px] flex-col items-center gap-3 text-center text-black">
+    <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px]">( We )</p>
+    <h1
+      id="hero-heading"
+      class="text-[36px] font-normal leading-[120%] tracking-[-0.03em] sm:text-[48px]"
+    >
+      Help brands craft unique —
+      <span class="font-serif text-[1.08em] leading-none">films and visuals.</span>
+    </h1>
+  </div>
+</section>

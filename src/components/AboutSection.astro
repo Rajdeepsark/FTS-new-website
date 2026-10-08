@@ -1,0 +1,169 @@
+---
+/**
+ * Third homepage section: "( We are ) A Creative Studio for meaningful Storytelling".
+ *
+ * Built from the 1440 × 905 design screenshot (no Figma CSS for this one):
+ *   background  cream #F2EBE3 · ink text
+ *   statement   centred 506px block: 90px label column + 400px text column
+ *               label    Inter 500 · 14/14 · uppercase, sits beside the first heading line
+ *               heading  48/120% · -0.03em · serif runs on "A Creative Studio" and "Storytelling"
+ *               body     Inter 400 · 20/150%, two paragraphs, aligned with the heading
+ *   stills      three project stills scattered around the statement, each with a
+ *               "( 01 )" label and the project title underneath:
+ *                 left    219 × 170 at (71, 381)
+ *                 right   181 × 160 at (1259, 292), flush with the right edge
+ *                 bottom  410 × 220 at (839, 601)
+ *
+ * Scroll motion (lg and up, skipped under prefers-reduced-motion): the stills start
+ * gathered towards the statement, slightly smaller and fully inside the first
+ * viewport, and drift out to the design positions above while the page scrolls.
+ * `--spread` on the section runs 0 → 1 over the first 40vh of scroll after the
+ * section's top reaches the top of the viewport; each figure's `--gx` / `--gy`
+ * is its gathered offset from the design position. Without JS the stills simply
+ * sit at the design positions. The bottom still's `--gx` grows on narrower
+ * screens so it clears the text column when it rises.
+ *
+ * Below `lg` the stills drop into a loose two-column grid under the text.
+ * The stills reuse `src/data/projects.ts`; the design repeats "( 01 ) The Scroll
+ * That Stole Time" under all three, which is a placeholder, so each still gets
+ * its own project's number and title here.
+ */
+import { projects, type Project } from "../data/projects";
+
+interface Pick {
+  number: string;
+  aspect: string;
+  place: string;
+  mobile: string;
+  /** Gathered offset from the design position (`--gx` / `--gy`), lg and up. */
+  gather: string;
+}
+
+const picks: Pick[] = [
+  {
+    number: "01",
+    aspect: "aspect-[9/7]",
+    place: "lg:left-[4.9%] lg:top-[381px] lg:w-[15.2%]",
+    mobile: "",
+    gather: "--gx: 9vw; --gy: -4vh",
+  },
+  {
+    number: "02",
+    aspect: "aspect-[9/8]",
+    place: "lg:left-[87.4%] lg:top-[292px] lg:w-[12.6%]",
+    mobile: "mt-12",
+    gather: "--gx: -7vw; --gy: -4vh",
+  },
+  {
+    number: "06",
+    aspect: "aspect-[15/8]",
+    place: "lg:left-[58.3%] lg:top-[601px] lg:w-[28.5%]",
+    mobile: "col-span-2 w-3/4 justify-self-end",
+    gather: "--gx: max(8vw, 260px - 10.45vw); --gy: -9vh",
+  },
+];
+
+const figures = picks.flatMap((pick) => {
+  const project = projects.find((p: Project) => p.number === pick.number);
+  return project?.image ? [{ ...pick, project, image: project.image }] : [];
+});
+---
+
+<section
+  id="about"
+  class="relative overflow-hidden bg-cream px-4 py-16 sm:px-8 lg:h-[905px] lg:px-0 lg:pb-0 lg:pt-[108px] 2xl:h-[62.8vw]"
+  aria-labelledby="about-heading"
+  data-about-stage
+>
+  <div class="mx-auto grid max-w-[506px] gap-x-4 gap-y-6 md:grid-cols-[90px_1fr]">
+    <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px] text-ink md:mt-4 md:whitespace-nowrap">
+      ( We are )
+    </p>
+    <h2 id="about-heading" class="text-[36px] font-normal leading-[115%] tracking-[-0.03em] text-ink sm:text-[48px]">
+      <span class="font-serif text-[1.08em] leading-none">A Creative Studio</span><br />
+      for meaningful<br />
+      <span class="font-serif text-[1.08em] leading-none">Storytelling</span>
+    </h2>
+    <div class="space-y-7 text-[17px] leading-[150%] tracking-[-0.02em] text-ink sm:text-[20px] md:col-start-2 md:mt-2">
+      <p>
+        Flying Turtle Studio is a creative production house built on the belief that the most memorable
+        stories come from thinking beyond the obvious.
+      </p>
+      <p>
+        We blend artistry, storytelling, and technical expertise to craft meaningful visual experiences that
+        leave a lasting impact—bringing imagination to life while staying true to what matters most.
+      </p>
+    </div>
+  </div>
+
+  <div class="mt-14 grid grid-cols-2 gap-x-4 gap-y-10 lg:contents">
+    {
+      figures.map(({ project, image, aspect, place, mobile, gather }) => (
+        <figure class:list={["about-figure flex flex-col lg:absolute lg:m-0", mobile, place]} style={gather}>
+          <div class:list={["relative w-full overflow-hidden bg-[#e4ddd4]", aspect]}>
+            <img
+              class="absolute inset-0 size-full object-cover"
+              src={image.src}
+              alt={image.alt}
+              width="820"
+              height="560"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <figcaption class="mt-3">
+            <p class="text-[14px] font-medium uppercase leading-[14px] text-ink/50">( {project.number} )</p>
+            <p class="mt-1.5 text-[16px] leading-[130%] text-ink">{project.title}</p>
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  /* --spread: 0 = gathered inside the first viewport, 1 = design position. */
+  @media (min-width: 64rem) and (prefers-reduced-motion: no-preference) {
+    .about-figure {
+      --gather: calc(1 - var(--spread, 1));
+      transform: translate(calc(var(--gx, 0px) * var(--gather)), calc(var(--gy, 0px) * var(--gather)))
+        scale(calc(1 - 0.15 * var(--gather)));
+      will-change: transform;
+    }
+  }
+</style>
+
+<script>
+  const stage = document.querySelector<HTMLElement>("[data-about-stage]");
+  const motion = window.matchMedia("(min-width: 64rem) and (prefers-reduced-motion: no-preference)");
+
+  if (stage) {
+    // Spread completes once the section's top has travelled 40vh past the top of the viewport.
+    const TRAVEL = 0.4;
+    let queued = false;
+
+    const update = () => {
+      queued = false;
+      if (!motion.matches) {
+        stage.style.removeProperty("--spread");
+        return;
+      }
+      const top = stage.getBoundingClientRect().top;
+      const linear = Math.min(1, Math.max(0, -top / (window.innerHeight * TRAVEL)));
+      const eased = 1 - (1 - linear) * (1 - linear); // ease-out: settles gently into place
+      stage.style.setProperty("--spread", eased.toFixed(4));
+    };
+
+    const schedule = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    motion.addEventListener("change", schedule);
+    update();
+  }
+</script>

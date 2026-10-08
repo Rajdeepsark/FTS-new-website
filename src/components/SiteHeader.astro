@@ -1,0 +1,78 @@
+---
+/**
+ * Top navigation (the frame above the hero in the design).
+ *
+ *   left   logo mark + wordmark, links home
+ *   right  "IND" · filled 12px clock glyph · live local time, 13/14 uppercase, 10px apart
+ *
+ * The time is the studio's local time (India, Asia/Kolkata). It is server-rendered
+ * once and then kept current client-side, refreshed on every minute boundary; the
+ * glyph's hands follow the same time.
+ */
+import Logo from "./Logo.astro";
+
+const TIME_ZONE = "Asia/Kolkata";
+const now = new Date();
+const initialTime = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: TIME_ZONE,
+}).format(now);
+---
+
+<header class="absolute inset-x-0 top-0 z-40">
+  <div class="mx-auto flex max-w-[1800px] items-center justify-between px-6 py-6 sm:px-8 sm:py-8 lg:px-10">
+    <a class="text-ink transition-opacity hover:opacity-70" href="/" aria-label="Flying Turtle Studio home">
+      <Logo />
+    </a>
+
+    <p
+      class="flex items-center gap-2.5 text-[13px] font-normal uppercase leading-[14px] text-ink"
+      title="Local time at the studio (India)"
+      data-local-clock
+      data-time-zone={TIME_ZONE}
+    >
+      <span>IND</span>
+      <svg class="size-3 shrink-0" viewBox="0 0 12 12" aria-hidden="true">
+        <circle cx="6" cy="6" r="6" fill="currentColor" />
+        <g stroke="#ffffff" stroke-width="1.25" stroke-linecap="round" style="transform-origin: 6px 6px">
+          <line data-hand="hour" x1="6" y1="6" x2="6" y2="3.6" style="transform-origin: 6px 6px" />
+          <line data-hand="minute" x1="6" y1="6" x2="6" y2="2.5" style="transform-origin: 6px 6px" />
+        </g>
+      </svg>
+      <time datetime={now.toISOString()} data-local-time>{initialTime}</time>
+    </p>
+  </div>
+</header>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-local-clock]");
+  const timeEl = root?.querySelector<HTMLTimeElement>("[data-local-time]");
+  const hourHand = root?.querySelector<SVGLineElement>('[data-hand="hour"]');
+  const minuteHand = root?.querySelector<SVGLineElement>('[data-hand="minute"]');
+
+  if (root && timeEl) {
+    const timeZone = root.dataset.timeZone || "Asia/Kolkata";
+    const label = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true, timeZone });
+    const parts = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "numeric", hour12: false, timeZone });
+
+    const tick = () => {
+      const now = new Date();
+      timeEl.textContent = label.format(now);
+      timeEl.dateTime = now.toISOString();
+
+      const p = Object.fromEntries(parts.formatToParts(now).map(({ type, value }) => [type, value]));
+      const h = Number(p.hour) % 12;
+      const m = Number(p.minute);
+      hourHand?.style.setProperty("transform", `rotate(${h * 30 + m * 0.5}deg)`);
+      minuteHand?.style.setProperty("transform", `rotate(${m * 6}deg)`);
+
+      // Re-run just after the next minute boundary.
+      const msToNextMinute = 60_000 - (now.getSeconds() * 1000 + now.getMilliseconds());
+      window.setTimeout(tick, msToNextMinute + 50);
+    };
+
+    tick();
+  }
+</script>
