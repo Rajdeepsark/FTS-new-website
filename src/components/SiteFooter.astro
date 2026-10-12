@@ -1,0 +1,181 @@
+---
+/**
+ * Site footer — the Figma "footer" frame (1440 × 1125): a sky, clouds and the glass
+ * turtle behind a closing invitation, with a thin bar of links along the bottom.
+ *
+ *   frame       padding 100px 64px · everything in #000
+ *   backdrop    `public/footer.jpg`, the whole frame as one picture (cream at the
+ *               top, so it grows out of the section above it)
+ *   container   1312 × 189 row · gap 200px · bottom-aligned
+ *     left      column · gap 12px
+ *               ( TELL US YOUR STORY )  Inter 500 · 14/14 · uppercase, in a 25px box
+ *               invitation, 699px       Inter 400 · 32/120% · -0.03em
+ *     right     413px column · label at the top, address at the bottom
+ *               ( CONTACT US TODAY )    Inter 500 · 14/14 · uppercase, no box, which
+ *                                       sets it 5px higher than the left label
+ *               address                 Inter 400 · 32/120% · -0.03em · underlined,
+ *                                       then a 43px arrow (Material "arrow outward")
+ *   bar         72px · padding 16px 64px · white at 10% · space-between
+ *               links 13/14 uppercase · gap 24px · 5px dot after PROJECTS and ABOUT
+ *               copyright 16/20, centred, 214px (two lines)
+ *               credit 16/20, right-aligned; the two side blocks are both 411px
+ *               in Figma, here two equal grid columns, which centres the copyright
+ *               the same way without pinning the links to a width they overflow
+ *
+ * Height: never more than one screen. From `lg` the footer is the frame's own
+ * proportions or 100svh, whichever is shorter, and `--u` is one design pixel at
+ * that size (the smaller of width / 1440 and height / 1125), so the top padding,
+ * the gap and the 32px type shrink together and the text stays clear of the turtle
+ * (type stops at 18px). The backdrop covers the footer; when the screen is the
+ * limit that crops it top and bottom, and its position keeps the turtle between
+ * the text and the bar.
+ * Below `lg` the text and the bar stack over the same backdrop and the footer is
+ * one screen tall, or 640px on screens shorter than that, which is the least the
+ * text, the turtle and the bar need.
+ *
+ * The fixed floating nav would sit on top of the bar at the end of the page, and
+ * the bar carries the same links, so the script fades the nav out while the bar is
+ * on screen. Without JS the nav simply stays.
+ *
+ * Not from Figma: the copyright year is the current year (the design says 2024),
+ * and the link targets. Instagram is the profile the studio's live site links to;
+ * the YouTube channel is the one that published the studio's films.
+ */
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
+const email = "hello@flyingturtlestudio.in";
+
+interface FooterLink {
+  href: string;
+  label: string;
+  /** The 5px dot of the design, after PROJECTS and ABOUT. */
+  dot?: boolean;
+  external?: boolean;
+}
+
+const links: FooterLink[] = [
+  { href: "/projects", label: "Projects", dot: true },
+  { href: "/about", label: "About", dot: true },
+  { href: "/contact", label: "Contact" },
+  { href: "https://www.instagram.com/flying_turtle_studio/", label: "Instagram", external: true },
+  { href: "https://www.youtube.com/@flyingturtlestudio", label: "Youtube", external: true },
+];
+
+const big =
+  "text-[20px] leading-[120%] tracking-[-0.03em] sm:text-[22px] lg:text-[clamp(18px,calc(32*var(--u)),32px)]";
+---
+
+<footer
+  class="site-footer relative isolate flex min-h-[max(100svh,640px)] flex-col bg-cream text-black lg:h-[min(78.15vw,100svh)] lg:min-h-[520px]"
+>
+  <img
+    class="absolute inset-0 -z-10 size-full object-cover lg:object-[50%_36%]"
+    src="/footer.jpg"
+    alt=""
+    width="2160"
+    height="1688"
+    loading="lazy"
+    decoding="async"
+  />
+
+  <div
+    class="flex flex-col gap-6 px-4 pt-8 sm:gap-10 sm:px-16 sm:pt-12 lg:flex-row lg:items-end lg:justify-between lg:gap-[min(200px,calc(200*var(--u)))] lg:pt-[min(100px,calc(100*var(--u)))]"
+  >
+    <div class="flex flex-1 flex-col items-start gap-3">
+      <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px]">( Tell us your story )</p>
+      <p class:list={["max-w-[21.85em]", big]}>
+        Share with us your vision, brand essence, musical inspirations, script concepts, dreams, and heartfelt
+        experiences. Let's bring your story to life through our creative lens.
+      </p>
+    </div>
+
+    <div class="flex shrink-0 flex-col items-start justify-between gap-3 lg:self-stretch">
+      <p class="text-[14px] font-medium uppercase leading-[14px]">( Contact us today )</p>
+      <a class:list={["group inline-flex items-start", big]} href={`mailto:${email}`}>
+        <span class="underline">{email}</span>
+        <svg
+          class="size-[1.343em] shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6z"></path>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <div
+    class="mt-auto flex flex-col items-start gap-3 bg-white/10 px-4 py-6 sm:px-16 lg:h-[72px] lg:flex-row lg:items-center lg:justify-between lg:py-4 xl:grid xl:grid-cols-[1fr_auto_1fr]"
+    data-footer-bar
+  >
+    <nav aria-label="Footer">
+      <ul class="flex flex-wrap items-center gap-x-6 gap-y-1 lg:flex-nowrap">
+        {
+          links.map(({ href, label, dot, external }) => (
+            <li class="relative isolate">
+              <a
+                class="block pb-[5.71px] pt-[4.7px] text-[13px] uppercase leading-[14px] transition-opacity hover:opacity-70"
+                href={href}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer" : undefined}
+                aria-current={currentPath === href ? "page" : undefined}
+              >
+                {label}
+              </a>
+              {dot && <span class="absolute -right-[10px] top-[5px] -z-10 size-[5px] rounded-full bg-black" aria-hidden="true" />}
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <p class="text-[16px] leading-[20px] lg:w-[214px] lg:text-center">
+      © Flying Turtle Studio {new Date().getFullYear()}. All Rights Reserved
+    </p>
+
+    <a
+      class="text-[16px] leading-[20px] transition-opacity hover:opacity-70 xl:justify-self-end"
+      href="https://poroflo.co/"
+      target="_blank"
+      rel="noopener"
+    >
+      Designed by Poroflo
+    </a>
+  </div>
+</footer>
+
+<style>
+  /* One design pixel: the frame is 1440 × 1125.33. Used from `lg` (see above). */
+  .site-footer {
+    --u: min(0.069444vw, 0.088863svh);
+  }
+</style>
+
+<style is:global>
+  /* The floating nav steps aside while the footer bar is on screen (see the script). */
+  [data-floating-nav] {
+    transition:
+      opacity 0.3s ease,
+      visibility 0.3s;
+  }
+
+  [data-floating-nav][data-at-footer] {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-floating-nav] {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>("[data-footer-bar]");
+  const nav = document.querySelector<HTMLElement>("[data-floating-nav]");
+
+  if (bar && nav && "IntersectionObserver" in window) {
+    new IntersectionObserver(([entry]) => nav.toggleAttribute("data-at-footer", entry.isIntersecting)).observe(bar);
+  }
+</script>

@@ -3,7 +3,7 @@ import "../styles/global.css";
 import "lenis/dist/lenis.css";
 import SiteHeader from "../components/SiteHeader.astro";
 import FloatingNav from "../components/FloatingNav.astro";
-import Logo from "../components/Logo.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 
 interface Props {
   title: string;
@@ -33,13 +33,7 @@ const { title, description } = Astro.props;
     <main id="main">
       <slot />
     </main>
-    <footer class="border-t border-ink/10">
-      <div class="mx-auto flex max-w-7xl flex-col gap-4 px-6 pb-32 pt-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between lg:px-10">
-        <a class="text-ink" href="/" aria-label="Flying Turtle Studio home"><Logo class="h-7 sm:h-7" /></a>
-        <p>Films and visuals for brands with something to say.</p>
-        <p>© {new Date().getFullYear()} Flying Turtle Studio</p>
-      </div>
-    </footer>
+    <SiteFooter />
     <FloatingNav />
 
     <script>
