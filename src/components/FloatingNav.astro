@@ -1,17 +1,34 @@
 ---
 /**
- * Fixed bottom navigation — layer 2 ("navigation") of the Figma hero frame.
+ * Fixed bottom navigation — layer 2 ("navigation") of the Figma hero frame, finished
+ * in glass after Apple's Liquid Glass.
  *
- *   navigation  row · gap 6px · 32px from the bottom edge
- *   Header      frosted pill · padding 16px 32px · radius 120px · bg white/10 · border white/10
- *   List        gap 32px · Inter 400 · 13/14 · uppercase · white
- *   Background  5 × 5 white dot at right -10px / top 5px after PROJECTS and ABOUT
- *   Header      white pill · padding 16px 32px · radius 120px · "Talk to us" in #000
+ *   navigation  row · gap 6px · 32px from the bottom edge (20px on phones)
+ *   links       glass capsule · padding 16px 26px · radius 120px
+ *               Inter 400 · 13/14 · uppercase · 5 × 5 dot after PROJECTS and ABOUT
+ *   Talk to us  prominent glass capsule: white-tinted, #000 label · padding 16px 32px
  *
- * The white Figma colours only read against the dark bottom of the hero image, so
- * the nav watches any `[data-nav-tone]` section and switches to that tone while the
- * section sits in the band the nav occupies. Everywhere else it falls back to ink
- * text on a frosted white pill. Without JS it stays in the fallback tone.
+ * The glass, as one `.glass` class on the finished shapes (never glass on glass):
+ *   material    the browser's own `backdrop-filter`: a blur, then a brightness
+ *               squeeze that keeps the lettering legible on any backdrop (see
+ *               "Tones" in the style block), then the colour put back. On top, a
+ *               1px specular rim, brightest top-left and bottom-right, and an
+ *               inner glow
+ *   refraction  Chromium only, switched on by the script, for the links capsule
+ *               in the light tone: the SVG filter below replaces the blur. It
+ *               frosts the middle the same way and bends a clearer, brighter
+ *               copy of the backdrop inward along a 13px bezel
+ *   lozenge     a highlight that glides between the links under the pointer or
+ *               keyboard focus and rests on the current page's link
+ *   touch       only the things you can press respond: links and the button dip
+ *               when pressed, the button lifts on hover
+ *   fallback    without `backdrop-filter`, or when the visitor asks for less
+ *               transparency or more contrast, the capsules turn solid
+ *
+ * Tone: the nav watches any `[data-nav-tone]` element and takes that tone while the
+ * element sits in the band the nav occupies. "light" is white lettering on clear
+ * glass, for photos and dark sections; everywhere else it falls back to "dark":
+ * ink lettering on milky glass. Without JS it stays in the fallback tone.
  */
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 const links = [
@@ -22,33 +39,23 @@ const links = [
 ---
 
 <nav
-  class="group pointer-events-none fixed inset-x-0 bottom-5 z-50 flex flex-wrap items-stretch justify-center gap-1.5 px-4 sm:bottom-8"
+  class="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex flex-wrap items-stretch justify-center gap-1.5 px-4 sm:bottom-8"
   aria-label="Main navigation"
   data-floating-nav
   data-tone="dark"
 >
-  <ul
-    class="pointer-events-auto flex items-center gap-3 rounded-[120px] border border-white/50 bg-white/30 px-[18px] py-4 shadow-[0_10px_40px_-12px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-colors duration-300 group-data-[tone=light]:border-white/10 group-data-[tone=light]:bg-white/10 group-data-[tone=light]:shadow-none sm:gap-5 sm:px-[26px]"
-  >
+  <ul class="glass pointer-events-auto flex items-center gap-3 px-[18px] py-4 sm:gap-5 sm:px-[26px]" data-nav-links>
+    <li class="lozenge" aria-hidden="true" data-nav-lozenge></li>
     {links.map(({ href, label, dot }) => (
-      <li class="relative isolate flex items-center">
+      <li class="flex items-center">
         <a
-          class:list={[
-            "relative rounded-full px-1.5 py-[5px] text-[13px] font-normal uppercase leading-[14px] text-ink transition-colors group-data-[tone=light]:text-white",
-            "hover:opacity-70",
-            currentPath === href && "underline decoration-current underline-offset-4",
-          ]}
+          class="link relative block rounded-full px-1.5 py-[5px] text-[13px] font-normal uppercase leading-[14px]"
           href={href}
           aria-current={currentPath === href ? "page" : undefined}
         >
           <span class="relative inline-block">
             {label}
-            {dot && (
-              <span
-                class="absolute -right-[10px] top-0 z-0 size-[5px] rounded-full bg-ink transition-colors group-data-[tone=light]:bg-white"
-                aria-hidden="true"
-              />
-            )}
+            {dot && <span class="absolute -right-[10px] top-0 size-[5px] rounded-full bg-current" aria-hidden="true" />}
           </span>
         </a>
       </li>
@@ -56,15 +63,261 @@ const links = [
   </ul>
 
   <a
-    class="pointer-events-auto flex items-center justify-center self-stretch rounded-[120px] border border-white/10 bg-white px-8 py-4 text-[13px] font-normal uppercase leading-[14px] text-black shadow-[0_10px_40px_-12px_rgba(0,0,0,0.35)] transition-colors hover:bg-ink hover:text-white group-data-[tone=light]:shadow-none"
+    class="glass glass-prominent pointer-events-auto flex items-center justify-center self-stretch px-8 py-4 text-[13px] font-normal uppercase leading-[14px]"
     href="/contact"
   >
     Talk to us
   </a>
+
+  {
+    /* Lens for the links capsule in the light tone. The script draws the map: red
+       and green are the x and y shift (mid-grey = none), blue is how much of the
+       bezel shows. Two copies of the backdrop are merged:
+         body   frosted, squeezed into 12%–36% brightness so the white lettering
+                reads on anything, then given its colour back
+         bezel  nearly clear, shifted by the map and left brighter, shown only
+                along the rim */
+  }
+  <svg class="absolute size-0" aria-hidden="true" focusable="false">
+    <filter
+      id="floating-nav-lens"
+      x="0"
+      y="0"
+      width="100%"
+      height="100%"
+      color-interpolation-filters="sRGB"
+      primitiveUnits="userSpaceOnUse"
+    >
+      <feImage x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map" data-nav-lens-map></feImage>
+
+      <feGaussianBlur in="SourceGraphic" stdDeviation="9" edgeMode="duplicate"></feGaussianBlur>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.24" intercept="0.12"></feFuncR>
+        <feFuncG type="linear" slope="0.24" intercept="0.12"></feFuncG>
+        <feFuncB type="linear" slope="0.24" intercept="0.12"></feFuncB>
+      </feComponentTransfer>
+      <feColorMatrix type="saturate" values="2" result="body"></feColorMatrix>
+
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" edgeMode="duplicate"></feGaussianBlur>
+      <feDisplacementMap in2="map" scale="-44" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.55" intercept="0.1"></feFuncR>
+        <feFuncG type="linear" slope="0.55" intercept="0.1"></feFuncG>
+        <feFuncB type="linear" slope="0.55" intercept="0.1"></feFuncB>
+      </feComponentTransfer>
+      <feColorMatrix type="saturate" values="1.5" result="bent"></feColorMatrix>
+      <feColorMatrix in="map" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0" result="rim"
+      ></feColorMatrix>
+      <feComposite in="bent" in2="rim" operator="in" result="bezel"></feComposite>
+
+      <feMerge>
+        <feMergeNode in="body"></feMergeNode>
+        <feMergeNode in="bezel"></feMergeNode>
+      </feMerge>
+    </filter>
+  </svg>
 </nav>
+
+<style>
+  /* ---- Tones ------------------------------------------------------------------ */
+  /* Legibility is settled here, for any backdrop, not left to the photo behind.
+     Light tone: contrast(0.5) brightness(0.48) squeezes the backdrop into 12%–36%
+     brightness before the white lettering goes on, and saturate(200%) gives the
+     colour back without lifting it. Dark tone: a 60% white tint does the same for
+     the ink lettering. Measured in Chrome with the page grain on, worst pixel
+     under a label: 5.3:1 over flat white and 4.7:1 with the lozenge on top (the
+     worst cases), about 7:1 over the hero clip, 5.6:1 for ink over flat black. */
+  nav {
+    --glass-ink: #16251f;
+    --glass-tint: rgb(255 255 255 / 0.6);
+    --glass-optics: contrast(1) brightness(1.06) saturate(170%);
+    --glass-rim: rgb(255 255 255 / 0.95);
+    --glass-rim-soft: rgb(255 255 255 / 0.3);
+    --glass-depth: 0 12px 36px -12px rgb(0 0 0 / 0.32), 0 1px 3px rgb(0 0 0 / 0.08);
+    --glass-glow: inset 0 1px 0 rgb(255 255 255 / 0.7), inset 0 -8px 12px -8px rgb(22 37 31 / 0.1);
+    --glass-solid: #f7f8f4;
+    --lozenge: rgb(22 37 31 / 0.08);
+  }
+
+  nav[data-tone="light"] {
+    --glass-ink: #fff;
+    --glass-tint: rgb(255 255 255 / 0);
+    --glass-optics: contrast(0.5) brightness(0.48) saturate(200%);
+    --glass-rim: rgb(255 255 255 / 0.6);
+    --glass-rim-soft: rgb(255 255 255 / 0.08);
+    --glass-depth: 0 12px 32px -12px rgb(0 0 0 / 0.5);
+    --glass-glow: inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 0 14px rgb(255 255 255 / 0.07);
+    --glass-solid: #262523;
+    --lozenge: rgb(255 255 255 / 0.06);
+  }
+
+  /* ---- Material ---------------------------------------------------------------- */
+  .glass {
+    position: relative;
+    isolation: isolate;
+    border-radius: 120px;
+    background-color: var(--glass-tint);
+    -webkit-backdrop-filter: blur(16px) var(--glass-optics);
+    backdrop-filter: blur(16px) var(--glass-optics);
+    box-shadow: var(--glass-depth), var(--glass-glow);
+    color: var(--glass-ink);
+  }
+
+  /* Tone changes cross-fade, but only once the script has set the first tone: the
+     markup starts in the fallback tone, and the page should not open on a fade. */
+  nav[data-ready] .glass {
+    transition:
+      background-color 0.3s ease,
+      -webkit-backdrop-filter 0.3s ease,
+      backdrop-filter 0.3s ease,
+      box-shadow 0.3s ease,
+      color 0.3s ease;
+  }
+
+  /* Specular rim: a 1px ring, lit from the top left and catching light again at the
+     bottom right. The mask keeps only the ring of the gradient. */
+  .glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      140deg,
+      var(--glass-rim) 0%,
+      var(--glass-rim-soft) 30%,
+      var(--glass-rim-soft) 66%,
+      var(--glass-rim) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+
+  /* Refraction, for the links capsule in the light tone (the dark tone only ever sits
+     on flat paper, where there is nothing to bend). The lens filter frosts and
+     grades the backdrop itself, so it replaces the whole list above. */
+  nav[data-refract][data-tone="light"] .glass:not(.glass-prominent) {
+    -webkit-backdrop-filter: url(#floating-nav-lens);
+    backdrop-filter: url(#floating-nav-lens);
+  }
+
+  /* The button: glass tinted almost to white, in either tone. */
+  .glass-prominent {
+    --glass-ink: #000;
+    --glass-tint: rgb(255 255 255 / 0.86);
+    --glass-optics: contrast(1) brightness(1) saturate(170%);
+    --glass-rim: #fff;
+    --glass-rim-soft: rgb(255 255 255 / 0.5);
+    --glass-glow: inset 0 1px 0 #fff, inset 0 -8px 12px -8px rgb(0 0 0 / 0.1);
+    --glass-solid: #fff;
+  }
+
+  /* ---- Touch: only what can be pressed responds --------------------------------- */
+  nav .glass.glass-prominent {
+    transition:
+      background-color 0.3s ease,
+      transform 0.4s cubic-bezier(0.3, 1.5, 0.5, 1);
+  }
+
+  @media (hover: hover) {
+    .glass-prominent:hover {
+      --glass-tint: #fff;
+      transform: scale(1.03);
+    }
+  }
+
+  .glass-prominent:active {
+    transform: scale(0.96);
+  }
+
+  .link {
+    transition: transform 0.4s cubic-bezier(0.3, 1.5, 0.5, 1);
+  }
+
+  .link:active {
+    transform: scale(0.94);
+  }
+
+  .link:focus-visible,
+  .glass-prominent:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* The lozenge sits 8px inside the capsule, so the two curves stay concentric. The
+     script places it with --lozenge-x / --lozenge-width and shows it by setting
+     data-lozenge on the nav. */
+  .lozenge {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    bottom: 8px;
+    z-index: -1;
+    width: var(--lozenge-width, 0px);
+    border-radius: 120px;
+    background-color: var(--lozenge);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.16),
+      inset 0 1px 0 rgb(255 255 255 / 0.3);
+    opacity: 0;
+    transform: translateX(var(--lozenge-x, 0px));
+    transition:
+      transform 0.5s cubic-bezier(0.3, 1.35, 0.45, 1),
+      width 0.5s cubic-bezier(0.3, 1.35, 0.45, 1),
+      opacity 0.25s ease,
+      background-color 0.3s ease;
+    pointer-events: none;
+  }
+
+  nav[data-lozenge] .lozenge {
+    opacity: 1;
+  }
+
+  /* ---- Fallback: no backdrop-filter, or the visitor asked for a plainer screen -- */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+      background-color: var(--glass-solid);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    .glass,
+    nav[data-refract][data-tone="light"] .glass:not(.glass-prominent) {
+      background-color: var(--glass-solid);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    nav[data-ready] .glass,
+    nav .glass.glass-prominent,
+    .link,
+    .lozenge {
+      transition: none;
+    }
+
+    .glass-prominent:hover,
+    .glass-prominent:active,
+    .link:active {
+      transform: none;
+    }
+  }
+</style>
 
 <script>
   const nav = document.querySelector<HTMLElement>("[data-floating-nav]");
+  const list = nav?.querySelector<HTMLElement>("[data-nav-links]");
+  const lozenge = list?.querySelector<HTMLElement>("[data-nav-lozenge]");
+  const lensMap = nav?.querySelector<SVGFEImageElement>("[data-nav-lens-map]");
+
+  // ---- Tone -------------------------------------------------------------------
   const zones = document.querySelectorAll<HTMLElement>("[data-nav-tone]");
 
   if (nav && zones.length && "IntersectionObserver" in window) {
@@ -78,10 +331,123 @@ const links = [
         }
         const [zone] = active;
         nav.dataset.tone = zone?.dataset.navTone ?? "dark";
+        // From the next frame on, tone changes cross-fade (see the style block).
+        if (!nav.hasAttribute("data-ready")) requestAnimationFrame(() => nav.setAttribute("data-ready", ""));
       },
       // Only the bottom ~14% of the viewport — the band the nav sits in — counts.
       { rootMargin: "-86% 0px 0px 0px", threshold: 0 },
     );
     zones.forEach((zone) => observer.observe(zone));
+  }
+
+  // ---- Lozenge ----------------------------------------------------------------
+  if (nav && list && lozenge) {
+    const REACH = 12; // px the lozenge extends past a link's label on each side
+    const links = list.querySelectorAll<HTMLElement>("a");
+    const home = list.querySelector<HTMLElement>('a[aria-current="page"]');
+    let target: HTMLElement | null = null;
+
+    const place = (link: HTMLElement | null) => {
+      target = link;
+      if (!link) return nav.removeAttribute("data-lozenge");
+
+      const x = link.getBoundingClientRect().left - list.getBoundingClientRect().left - REACH;
+      const appearing = !nav.hasAttribute("data-lozenge");
+      // Coming out of hiding it fades in where it is needed; it only glides
+      // between links.
+      if (appearing) lozenge.style.transition = "none";
+      lozenge.style.setProperty("--lozenge-x", `${x.toFixed(1)}px`);
+      lozenge.style.setProperty("--lozenge-width", `${(link.offsetWidth + REACH * 2).toFixed(1)}px`);
+      if (appearing) {
+        void lozenge.offsetWidth;
+        lozenge.style.removeProperty("transition");
+      }
+      nav.setAttribute("data-lozenge", "");
+    };
+
+    for (const link of links) {
+      link.addEventListener("pointerenter", () => place(link));
+      link.addEventListener("focus", () => place(link));
+    }
+    list.addEventListener("pointerleave", () => place(home));
+    list.addEventListener("focusout", (event) => {
+      if (!list.contains(event.relatedTarget as Node | null)) place(home);
+    });
+
+    // The links move when the fonts arrive or the row wraps.
+    new ResizeObserver(() => place(target)).observe(list);
+    place(home);
+  }
+
+  // ---- Refraction ---------------------------------------------------------------
+  // Chromium is the only engine that runs an SVG filter as a backdrop-filter;
+  // elsewhere the declaration would switch the glass off, so it is opt-in. The map
+  // tells the filter how far to shift each pixel: along the capsule's edge normal,
+  // strongest at the rim and fading to nothing one bezel in. The filter's negative
+  // scale turns that into an inward pull, so the rim shows what lies deeper under
+  // the glass, squeezed, the way a thick lens edge does.
+  type Brands = { brands?: { brand: string }[] };
+  const chromium = (navigator as Navigator & { userAgentData?: Brands }).userAgentData?.brands?.some(
+    ({ brand }) => brand === "Chromium",
+  );
+
+  if (nav && list && lensMap && chromium) {
+    const BEZEL = 13; // px of rim that bends light
+    const canvas = document.createElement("canvas");
+    const ink = canvas.getContext("2d");
+
+    const draw = () => {
+      const width = list.offsetWidth;
+      const height = list.offsetHeight;
+      if (!ink || !width || !height) return;
+
+      canvas.width = width;
+      canvas.height = height;
+      const map = ink.createImageData(width, height);
+      const halfW = width / 2;
+      const halfH = height / 2;
+      const radius = Math.min(halfW, halfH);
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          // Signed distance to the capsule's edge, and the edge normal there.
+          const px = x + 0.5 - halfW;
+          const py = y + 0.5 - halfH;
+          const qx = Math.abs(px) - (halfW - radius);
+          const qy = Math.abs(py) - (halfH - radius);
+          const ox = Math.max(qx, 0);
+          const oy = Math.max(qy, 0);
+          const reach = Math.hypot(ox, oy);
+          const depth = radius - reach - Math.min(Math.max(qx, qy), 0);
+
+          let nx = 0;
+          let ny = 0;
+          if (reach > 0) {
+            nx = (ox / reach) * Math.sign(px);
+            ny = (oy / reach) * Math.sign(py);
+          } else if (qx > qy) nx = Math.sign(px);
+          else ny = Math.sign(py);
+
+          // 0 at the rim, 1 one bezel in. The shift eases out over the whole
+          // bezel; the bezel itself stays solid for its outer fifth, then fades.
+          const t = Math.min(1, Math.max(0, depth / BEZEL));
+          const bend = (1 - t) ** 2;
+          const fade = Math.min(1, Math.max(0, (t - 0.2) / 0.8));
+          const i = (y * width + x) * 4;
+          map.data[i] = 128 + 127 * nx * bend;
+          map.data[i + 1] = 128 + 127 * ny * bend;
+          map.data[i + 2] = 255 * (1 - fade * fade * (3 - 2 * fade));
+          map.data[i + 3] = 255;
+        }
+      }
+
+      ink.putImageData(map, 0, 0);
+      lensMap.setAttribute("href", canvas.toDataURL());
+      lensMap.setAttribute("width", String(width));
+      lensMap.setAttribute("height", String(height));
+      nav.setAttribute("data-refract", "");
+    };
+
+    new ResizeObserver(draw).observe(list);
   }
 </script>
