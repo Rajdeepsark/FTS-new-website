@@ -1,0 +1,751 @@
+---
+/**
+ * Fifth homepage section: the interactive camera bench (the cream Figma frame that
+ * follows the services list). A photo sits in a viewfinder and the controls beside
+ * it regrade it live.
+ *
+ *   section     padding 96px 64px 0 (16px sides on phones) · #F2EBE3
+ *   frame       padding 32px · gap 32px · #0D0C0B at 5% · 1px white/10 inner stroke
+ *   heading     ( INTERACTIVE CAMERA BENCH )  Inter 500 · 14/14 · uppercase · #000 at 50%
+ *               Photography                  Inter Tight 500 · 48/120% · -0.03em · #000
+ *               intro, 452px                 Inter 400 · 20/150% · -0.03em · #000
+ *   bench       padding 32px · gap 32px · #0D0C0B · 1px white/10 inner stroke
+ *     viewfinder  696 × 487 · read-outs Inter 500 · 10/175% · uppercase · 70%
+ *                 (REC block #FC1515, the rest #F2EBE3) · 12px inset
+ *     controls    456px column · gap 32px
+ *                 chips    padding 12px 16px (12px for sentiments) · gap 10px · white/5 ·
+ *                          Inter 500 · 12/14 · uppercase · #F2EBE3, 50% when idle ·
+ *                          6px corner brackets on the selected one
+ *                 sliders  9px #D9D9D9/10 track · 20px #373534 thumb with 4px brackets
+ *
+ * Under 1280px the viewfinder stacks on top of the controls: at Figma's 696 × 487
+ * shape, or 4:3 under 768px so the read-outs still sit on the mattes (phones also
+ * drop the "Lens_type:" and "Sentiment:" prefixes). From 1280px they sit side by
+ * side at 696 : 456, and the controls never drop below the 456px their chip rows
+ * need, so the viewfinder gives up width first.
+ *
+ * What the controls do (data and maths in `src/data/cameraBench.ts`):
+ *   sliders     drive one CSS filter on the photo (contrast, monochrome mix,
+ *               brightness) and the opacity of a grain layer. The first look is
+ *               Figma's: its thumb positions, with the photo at half brightness
+ *               standing for the 50% #100E0E veil the design lays over it
+ *   lens        sets the gate (2.39:1 mattes, open gate, rounded 4:3), zoom and
+ *               vignette in CSS, and eases the sliders to that lens's levels with a
+ *               short focus pull. Grabbing a slider takes over from the ease
+ *   sentiment   cross-fades two tint layers (a `color` blend and a `soft-light` one)
+ * Without JS the bench shows its first look and the chips only change selection.
+ * Under prefers-reduced-motion lens changes land at once and the grain holds still.
+ *
+ * Two things here are not in Figma, where every slider reads "Contrast scale" and
+ * both chip rows read "[ Select lens profile ]": the names of sliders two to four
+ * and the second row's label. They follow the section's own intro copy and the
+ * viewfinder's "Sentiment" read-out.
+ *
+ * The photo is `public/bench/viewfinder.jpg` (1392 × 974, twice the frame): a crop of
+ * the hero still, standing in for the Figma layer `666845691cfa8ea894d2842c_2-p-1080`.
+ * To change it, replace the file keeping its name.
+ */
+import { iso, lenses, levelControls, look, sentiments } from "../data/cameraBench";
+
+const lens = lenses[0];
+const sentiment = sentiments[0];
+const first = look(lens.levels);
+
+const viewStyle = [
+  `--brightness:${first.brightness.toFixed(3)}`,
+  `--contrast:${first.contrast.toFixed(3)}`,
+  `--grayscale:${first.grayscale.toFixed(3)}`,
+  `--grain:${first.grain.toFixed(3)}`,
+  `--sepia:${lens.sepia}`,
+  `--saturate:${lens.saturate}`,
+  `--blur:${lens.blur}px`,
+].join(";");
+
+const caption = "text-[14px] font-medium uppercase leading-[15px] text-cream opacity-50";
+const readout =
+  "whitespace-nowrap text-[9px] font-medium uppercase leading-[13px] opacity-70 sm:text-[10px] sm:leading-[18px]";
+---
+
+<section id="camera-bench" class="bg-cream px-4 pt-16 sm:px-16 sm:pt-24" aria-labelledby="bench-heading" data-bench>
+  <div class="flex flex-col gap-6 bg-night/5 p-4 ring-1 ring-inset ring-white/10 sm:gap-8 sm:p-8">
+    <header class="flex flex-col gap-6 text-black lg:flex-row lg:items-center lg:justify-between lg:gap-4">
+      <div class="flex flex-col gap-4">
+        <p class="text-[14px] font-medium uppercase leading-[15px] opacity-50">( Interactive camera bench )</p>
+        <h2
+          id="bench-heading"
+          class="font-tight text-[36px] font-medium leading-[120%] tracking-[-0.03em] sm:text-[48px]"
+        >
+          Photography
+        </h2>
+      </div>
+      <p class="max-w-[452px] text-[17px] leading-[150%] tracking-[-0.03em] sm:text-[20px]">
+        Adjust our cinematic viewfinders and lens types in real-time. Test exposure levels, grain density, and
+        monochrome silver matrix filters directly.
+      </p>
+    </header>
+
+    <div class="relative bg-night p-4 ring-1 ring-inset ring-white/10 sm:p-8">
+      {
+        /* Turns the floating nav white only while all of it is over this dark panel.
+           The nav watches the bottom 14% of the screen and sits 32px to 90px above
+           the bottom edge, hence the insets; tagging the whole panel would leave it
+           white on cream as the panel's edges pass. */
+      }
+      <div
+        class="pointer-events-none absolute inset-x-0 bottom-[calc(14svh-32px)] top-[90px]"
+        aria-hidden="true"
+        data-nav-tone="light"
+      >
+      </div>
+      <div class="relative flex flex-col gap-8 xl:flex-row">
+        <figure
+          class="vf relative isolate m-0 overflow-hidden bg-night text-cream xl:min-w-0 xl:flex-[696_1_0%]"
+          aria-label="Viewfinder preview"
+          data-bench-view
+          data-lens={lens.id}
+          data-sentiment={sentiment.id}
+          style={viewStyle}
+        >
+          <div class="vf-picture">
+            <div class="vf-film">
+              <img
+                class="absolute inset-0 size-full object-cover"
+                src="/bench/viewfinder.jpg"
+                alt="A hillside of orange and pink wildflowers at sunrise"
+                width="1392"
+                height="974"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div class="vf-tint vf-tint-hue"></div>
+            <div class="vf-tint vf-tint-tone"></div>
+          </div>
+          <div class="vf-vignette"></div>
+          <div class="vf-grain" data-bench-grain></div>
+          <div class="vf-gate"></div>
+          <div class="vf-scrim"></div>
+
+          <div class="absolute inset-0 flex flex-col justify-between" aria-hidden="true">
+            <div class="flex items-center justify-between gap-3 p-2 sm:p-3">
+              <p class:list={[readout, "text-[#FC1515]"]}>
+                Rec live<br />
+                ISO <span data-bench-readout="iso">{iso(lens.levels.exposure)}</span><br />
+                <span class="max-sm:hidden">Lens_type: </span><span data-bench-readout="lens">{lens.label}</span>
+              </p>
+              <p class:list={[readout, "text-right"]}>
+                <span data-bench-readout="timing">{lens.timing}</span><br />
+                <span class="max-sm:hidden">Sentiment: </span><span data-bench-readout="sentiment">{sentiment.label}</span><br />
+                UTC -06:00
+              </p>
+            </div>
+            <div class="flex items-end justify-between gap-3 p-2 sm:p-3">
+              <p class:list={[readout, "flex-1"]}>A: <span data-bench-readout="aperture">{lens.aperture}</span></p>
+              <p class:list={[readout, "hidden text-center md:block"]}>Flying Turtle Studio workbenches v1.82</p>
+              <p class:list={[readout, "flex-1 text-right"]}>Batt 94%</p>
+            </div>
+          </div>
+        </figure>
+
+        <div class="flex flex-col gap-8 xl:min-w-[456px] xl:flex-[456_1_0%] xl:justify-between">
+          <h3 class="text-[20px] font-normal uppercase leading-[150%] tracking-[-0.03em] text-cream">
+            Lens &amp; matrix controls
+          </h3>
+
+          <div class="flex flex-col gap-4">
+            <p id="bench-lens-label" class={caption}>[ Select lens profile ]</p>
+            <div class="flex flex-wrap gap-[10px] xl:flex-nowrap" role="radiogroup" aria-labelledby="bench-lens-label">
+              {
+                lenses.map(({ id, label }, index) => (
+                  <label class="chip px-4">
+                    <input class="sr-only" type="radio" name="bench-lens" value={id} checked={index === 0} />
+                    {label}
+                  </label>
+                ))
+              }
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-[19.25px]">
+            {
+              levelControls.map(({ id, label }) => (
+                <div class="flex flex-col">
+                  <label class={caption} for={`bench-${id}`}>
+                    {label}
+                  </label>
+                  <input
+                    class="range"
+                    id={`bench-${id}`}
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={lens.levels[id]}
+                    data-bench-level={id}
+                  />
+                </div>
+              ))
+            }
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <p id="bench-sentiment-label" class={caption}>[ Select colour sentiment ]</p>
+            <div
+              class="flex flex-wrap gap-[10px] xl:flex-nowrap"
+              role="radiogroup"
+              aria-labelledby="bench-sentiment-label"
+            >
+              {
+                sentiments.map(({ id, label }, index) => (
+                  <label class="chip px-3">
+                    <input class="sr-only" type="radio" name="bench-sentiment" value={id} checked={index === 0} />
+                    {label}
+                  </label>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ---- Viewfinder ------------------------------------------------------------
+     An inline-size container, so the gate can be worked out from the frame's own
+     width (cqw) and --frame-height:
+       stacked, under 768px   4:3, so the read-outs still fit on the 2.39:1 mattes
+       stacked, from 768px    Figma's 696 × 487
+       beside the controls    a height that follows the window: 487px at 1440
+                              wide, 640px at most
+     cqh is avoided on purpose: Chrome resolves it to 0 when a min-height is what
+     sets the container's height. */
+  .vf {
+    container-type: inline-size;
+    --frame-ratio: 4 / 3;
+    --frame-height: calc(100cqw / (var(--frame-ratio)));
+    --frame: cubic-bezier(0.65, 0, 0.35, 1);
+    aspect-ratio: var(--frame-ratio);
+  }
+
+  @media (min-width: 48rem) {
+    .vf {
+      --frame-ratio: 696 / 487;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .vf {
+      --frame-height: clamp(487px, 33.8vw, 640px);
+      aspect-ratio: auto;
+      min-height: var(--frame-height);
+    }
+  }
+
+  .vf-picture,
+  .vf-film,
+  .vf-tint,
+  .vf-vignette,
+  .vf-scrim {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Its own stacking context: the tints blend with the film and nothing else. */
+  .vf-picture {
+    isolation: isolate;
+  }
+
+  /* The script writes the filter values as custom properties on .vf. Contrast and
+     the colour steps run on the photo as shot; exposure comes last, like a stop. */
+  .vf-film {
+    filter: contrast(var(--contrast)) grayscale(var(--grayscale)) sepia(var(--sepia)) saturate(var(--saturate))
+      brightness(var(--brightness)) blur(var(--blur));
+    transform: scale(var(--zoom));
+    transition: transform 0.8s var(--frame);
+  }
+
+  .vf-tint {
+    background-color: var(--tint, transparent);
+    opacity: var(--tint-strength, 0);
+    transition:
+      background-color 0.5s ease,
+      opacity 0.5s ease;
+  }
+
+  .vf-tint-hue {
+    --tint: var(--hue);
+    --tint-strength: var(--hue-strength);
+    mix-blend-mode: color;
+  }
+
+  .vf-tint-tone {
+    --tint: var(--tone);
+    --tint-strength: var(--tone-strength);
+    mix-blend-mode: soft-light;
+  }
+
+  .vf-vignette {
+    background: radial-gradient(ellipse at center, transparent 45%, rgb(8 7 6 / 0.8) 100%);
+    opacity: var(--vignette);
+    transition: opacity 0.6s ease;
+  }
+
+  /* Mid-grey noise, so `overlay` leaves the picture's exposure alone. The layer
+     overhangs the frame by 20% to leave room for the animation's jumps. This SVG
+     turbulence is the stand-in: the script swaps in a tile of true random noise,
+     which reads as film grain where turbulence has a faint weave to it. */
+  .vf-grain {
+    position: absolute;
+    inset: -20%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch' seed='11'/%3E%3CfeColorMatrix values='1.5 0 0 0 -0.25 1.5 0 0 0 -0.25 1.5 0 0 0 -0.25 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-size: 240px 240px;
+    mix-blend-mode: overlay;
+    opacity: var(--grain);
+  }
+
+  /* The gate is a window; its shadow is the matte around it. */
+  .vf-gate {
+    position: absolute;
+    inset: var(--gate-y) var(--gate-x);
+    border-radius: var(--gate-radius);
+    box-shadow: 0 0 0 100vmax rgb(13 12 11 / 0.66);
+    outline: 1px solid rgb(242 235 227 / 0.16);
+    transition:
+      inset 0.7s var(--frame),
+      border-radius 0.7s var(--frame);
+  }
+
+  /* Keeps the read-outs legible where no matte sits under them. */
+  .vf-scrim {
+    background: linear-gradient(
+      180deg,
+      rgb(13 12 11 / 0.88) 0%,
+      rgb(13 12 11 / 0.7) 14%,
+      transparent 36%,
+      transparent 80%,
+      rgb(13 12 11 / 0.7) 100%
+    );
+    opacity: var(--scrim);
+    transition: opacity 0.6s ease;
+  }
+
+  /* ---- Lens profiles --------------------------------------------------------- */
+  .vf[data-lens="anamorphic"] {
+    --gate-y: max(0px, (var(--frame-height) - 100cqw / 2.39) / 2);
+    --gate-x: 0px;
+    --gate-radius: 0px;
+    --zoom: 1.03;
+    --vignette: 0.45;
+    --scrim: 0;
+  }
+
+  .vf[data-lens="prime-50"] {
+    --gate-y: 0px;
+    --gate-x: 0px;
+    --gate-radius: 0px;
+    --zoom: 1.16;
+    --vignette: 0.2;
+    --scrim: 1;
+  }
+
+  .vf[data-lens="super-8"] {
+    --gate-y: calc(var(--frame-height) * 0.06);
+    --gate-x: max(4cqw, (100cqw - var(--frame-height) * 0.88 * 4 / 3) / 2);
+    --gate-radius: 14px;
+    --zoom: 1.08;
+    --vignette: 0.85;
+    --scrim: 0.7;
+  }
+
+  .vf[data-lens="noir"] {
+    --gate-y: 0px;
+    --gate-x: 0px;
+    --gate-radius: 0px;
+    --zoom: 1.1;
+    --vignette: 1;
+    --scrim: 1;
+  }
+
+  /* ---- Colour sentiments ----------------------------------------------------- */
+  .vf[data-sentiment="cyan"] {
+    --hue: #1fb6d6;
+    --hue-strength: 0.14;
+    --tone: #1a7f9c;
+    --tone-strength: 0.45;
+  }
+
+  .vf[data-sentiment="gold"] {
+    --hue: #ffab3d;
+    --hue-strength: 0.2;
+    --tone: #ffd28a;
+    --tone-strength: 0.4;
+  }
+
+  .vf[data-sentiment="sepia"] {
+    --hue: #b08a5e;
+    --hue-strength: 0.7;
+    --tone: #e6cfae;
+    --tone-strength: 0.3;
+  }
+
+  /* ---- Motion: live grain, and gate weave on Super 8. Only while on screen. --- */
+  @media (prefers-reduced-motion: no-preference) {
+    .vf[data-live] .vf-grain {
+      animation: bench-grain 0.7s steps(1, end) infinite;
+    }
+
+    .vf[data-live][data-lens="super-8"] .vf-picture {
+      animation: bench-weave 0.45s steps(1, end) infinite;
+    }
+  }
+
+  @keyframes bench-grain {
+    0% {
+      transform: translate(0, 0);
+    }
+    14% {
+      transform: translate(-9%, 6%);
+    }
+    28% {
+      transform: translate(7%, -11%);
+    }
+    42% {
+      transform: translate(-4%, -7%);
+    }
+    57% {
+      transform: translate(11%, 9%);
+    }
+    71% {
+      transform: translate(-12%, 3%);
+    }
+    85% {
+      transform: translate(5%, 12%);
+    }
+  }
+
+  @keyframes bench-weave {
+    0% {
+      transform: translate(0, 0);
+    }
+    20% {
+      transform: translate(0.6px, -0.9px);
+    }
+    40% {
+      transform: translate(-0.5px, 0.4px);
+    }
+    60% {
+      transform: translate(0.3px, 0.8px);
+    }
+    80% {
+      transform: translate(-0.7px, -0.3px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vf-film,
+    .vf-tint,
+    .vf-vignette,
+    .vf-gate,
+    .vf-scrim,
+    .chip,
+    .chip::before {
+      transition: none;
+    }
+  }
+
+  /* ---- Chips ----------------------------------------------------------------- */
+  .chip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: 12px;
+    background: rgb(255 255 255 / 0.05);
+    color: rgb(242 235 227 / 0.5);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 15px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition:
+      color 0.25s ease,
+      background-color 0.25s ease;
+  }
+
+  .chip:hover {
+    background: rgb(255 255 255 / 0.08);
+    color: rgb(242 235 227 / 0.8);
+  }
+
+  .chip:has(:checked) {
+    color: #f2ebe3;
+  }
+
+  .chip:has(:focus-visible) {
+    outline: 1px solid #f2ebe3;
+    outline-offset: 3px;
+  }
+
+  /* Corner brackets: four 6px corners drawn as eight 1px strokes. They wait just
+     outside the chip and close in on it when it is selected. */
+  .chip::before {
+    --stroke: linear-gradient(#f2ebe3, #f2ebe3);
+    content: "";
+    position: absolute;
+    inset: -5px;
+    background:
+      var(--stroke) left top / 6px 1px,
+      var(--stroke) left top / 1px 6px,
+      var(--stroke) right top / 6px 1px,
+      var(--stroke) right top / 1px 6px,
+      var(--stroke) left bottom / 6px 1px,
+      var(--stroke) left bottom / 1px 6px,
+      var(--stroke) right bottom / 6px 1px,
+      var(--stroke) right bottom / 1px 6px;
+    background-repeat: no-repeat;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      inset 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 0.2s ease;
+  }
+
+  .chip:has(:checked)::before {
+    inset: 0;
+    opacity: 1;
+  }
+
+  /* ---- Sliders ---------------------------------------------------------------
+     Native range inputs. The input is as tall as its 20px thumb and overhangs the
+     9px track by 5.5px each way, so the margins put the track 16px under the label
+     and keep the row at Figma's 40px. */
+  .range {
+    --stroke: linear-gradient(#f2ebe3, #f2ebe3);
+    --thumb:
+      var(--stroke) left top / 4px 1px no-repeat, var(--stroke) left top / 1px 4px no-repeat,
+      var(--stroke) right top / 4px 1px no-repeat, var(--stroke) right top / 1px 4px no-repeat,
+      var(--stroke) left bottom / 4px 1px no-repeat, var(--stroke) left bottom / 1px 4px no-repeat,
+      var(--stroke) right bottom / 4px 1px no-repeat, var(--stroke) right bottom / 1px 4px no-repeat, #373534;
+    display: block;
+    width: 100%;
+    height: 20px;
+    margin: 10.5px 0 -5.5px;
+    padding: 0;
+    background: transparent;
+    cursor: ew-resize;
+    touch-action: pan-y;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .range:focus {
+    outline: none;
+  }
+
+  .range::-webkit-slider-runnable-track {
+    height: 9px;
+    background: rgb(217 217 217 / 0.1);
+  }
+
+  .range::-moz-range-track {
+    height: 9px;
+    background: rgb(217 217 217 / 0.1);
+  }
+
+  .range::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+    margin-top: -5.5px;
+    border: 0;
+    border-radius: 0;
+    background: var(--thumb);
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border: 0;
+    border-radius: 0;
+    background: var(--thumb);
+  }
+
+  .range:hover::-webkit-slider-thumb,
+  .range:active::-webkit-slider-thumb {
+    background-color: #4a4745;
+  }
+
+  .range:hover::-moz-range-thumb,
+  .range:active::-moz-range-thumb {
+    background-color: #4a4745;
+  }
+
+  .range:focus-visible::-webkit-slider-thumb {
+    outline: 1px solid #f2ebe3;
+    outline-offset: 3px;
+  }
+
+  .range:focus-visible::-moz-range-thumb {
+    outline: 1px solid #f2ebe3;
+    outline-offset: 3px;
+  }
+</style>
+
+<script>
+  import { iso, lenses, look, sentiments, type LevelId, type Lens, type Levels } from "../data/cameraBench";
+
+  const bench = document.querySelector<HTMLElement>("[data-bench]");
+  const view = bench?.querySelector<HTMLElement>("[data-bench-view]");
+
+  if (bench && view) {
+    /** Everything a lens change eases: the four slider positions plus the glass. */
+    type Frame = Levels & Pick<Lens, "sepia" | "saturate" | "blur">;
+
+    const SETTLE = 700; // ms a lens change takes to land
+    const FOCUS_PULL = 5; // px of blur it starts from, on top of the lens's own
+    const GRAIN_TILE = 240; // px, the grain layer's background-size
+    const GRAIN_SPREAD = 90; // how far the noise strays from mid-grey, of 255
+
+    const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    const ranges = new Map<LevelId, HTMLInputElement>();
+    for (const range of bench.querySelectorAll<HTMLInputElement>("[data-bench-level]")) {
+      ranges.set(range.dataset.benchLevel as LevelId, range);
+    }
+
+    const write = (name: string, text: string) => {
+      const el = view.querySelector(`[data-bench-readout="${name}"]`);
+      if (el) el.textContent = text;
+    };
+    const checked = (name: string) => bench.querySelector<HTMLInputElement>(`input[name="${name}"]:checked`)?.value;
+    const glassOf = ({ sepia, saturate, blur }: Lens) => ({ sepia, saturate, blur });
+
+    let lens = lenses[0];
+    let glass = glassOf(lens);
+    let ticket = 0;
+
+    const levels = () => {
+      const now = {} as Levels;
+      for (const [id, range] of ranges) now[id] = Number(range.value);
+      return now;
+    };
+
+    // Sliders and glass → the custom properties the viewfinder's CSS reads.
+    const render = () => {
+      const now = levels();
+      const { brightness, contrast, grayscale, grain } = look(now);
+      view.style.setProperty("--brightness", brightness.toFixed(3));
+      view.style.setProperty("--contrast", contrast.toFixed(3));
+      view.style.setProperty("--grayscale", grayscale.toFixed(3));
+      view.style.setProperty("--grain", grain.toFixed(3));
+      view.style.setProperty("--sepia", glass.sepia.toFixed(3));
+      view.style.setProperty("--saturate", glass.saturate.toFixed(3));
+      view.style.setProperty("--blur", `${glass.blur.toFixed(2)}px`);
+      write("iso", String(iso(now.exposure)));
+    };
+
+    const paint = (frame: Frame) => {
+      for (const [id, range] of ranges) range.value = frame[id].toFixed(1);
+      glass = { sepia: frame.sepia, saturate: frame.saturate, blur: frame.blur };
+      render();
+    };
+
+    // Eases the sliders and the glass to a lens's settings.
+    const settle = (to: Lens) => {
+      cancelAnimationFrame(ticket);
+      const end: Frame = { ...to.levels, ...glassOf(to) };
+      if (!motion.matches) return paint(end);
+
+      const start: Frame = { ...levels(), ...glass, blur: glass.blur + FOCUS_PULL };
+      const keys = Object.keys(end) as (keyof Frame)[];
+      const began = performance.now();
+
+      const step = (time: number) => {
+        const t = Math.min(1, (time - began) / SETTLE);
+        const eased = t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+        const frame = {} as Frame;
+        for (const key of keys) frame[key] = start[key] + (end[key] - start[key]) * eased;
+        paint(frame);
+        if (t < 1) ticket = requestAnimationFrame(step);
+      };
+      ticket = requestAnimationFrame(step);
+    };
+
+    // The visitor takes a slider: stop easing and leave the rest where it is.
+    const hold = () => {
+      cancelAnimationFrame(ticket);
+      glass = glassOf(lens);
+    };
+
+    const showLens = (id: string | undefined) => {
+      const next = lenses.find((candidate) => candidate.id === id);
+      if (!next) return false;
+      lens = next;
+      view.dataset.lens = next.id;
+      write("lens", next.label);
+      write("aperture", next.aperture);
+      write("timing", next.timing);
+      return true;
+    };
+
+    const showSentiment = (id: string | undefined) => {
+      const next = sentiments.find((candidate) => candidate.id === id);
+      if (!next) return;
+      view.dataset.sentiment = next.id;
+      write("sentiment", next.label);
+    };
+
+    bench.addEventListener("change", (event) => {
+      const input = event.target as HTMLInputElement;
+      if (input.name === "bench-lens" && showLens(input.value)) settle(lens);
+      else if (input.name === "bench-sentiment") showSentiment(input.value);
+    });
+
+    for (const range of ranges.values()) {
+      range.addEventListener("input", render);
+      range.addEventListener("pointerdown", hold);
+
+      // The 0.1 step keeps dragging smooth; the keyboard moves in whole points.
+      range.addEventListener("keydown", (event) => {
+        const move = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 10, PageDown: -10 }[event.key];
+        if (!move) return;
+        event.preventDefault();
+        hold();
+        range.value = String(Math.round(Number(range.value)) + move * (event.shiftKey ? 10 : 1));
+        render();
+      });
+    }
+
+    // Film grain: one tile of noise around mid-grey, drawn once per visit.
+    const grain = view.querySelector<HTMLElement>("[data-bench-grain]");
+    const tile = document.createElement("canvas");
+    const ink = tile.getContext("2d");
+    if (grain && ink) {
+      tile.width = tile.height = GRAIN_TILE;
+      const pixels = ink.createImageData(GRAIN_TILE, GRAIN_TILE);
+      for (let i = 0; i < pixels.data.length; i += 4) {
+        // Three uniform draws added up land close to a normal spread.
+        const value = 128 + (Math.random() + Math.random() + Math.random() - 1.5) * GRAIN_SPREAD;
+        pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value;
+        pixels.data[i + 3] = 255;
+      }
+      ink.putImageData(pixels, 0, 0);
+      tile.toBlob((blob) => {
+        if (blob) grain.style.backgroundImage = `url(${URL.createObjectURL(blob)})`;
+      });
+    }
+
+    // Grain and gate weave only run while the viewfinder is on screen.
+    new IntersectionObserver(([entry]) => view.toggleAttribute("data-live", entry.isIntersecting)).observe(view);
+
+    // A reload can restore the form to something other than the markup's first look.
+    showLens(checked("bench-lens"));
+    showSentiment(checked("bench-sentiment"));
+    glass = glassOf(lens);
+    render();
+  }
+</script>

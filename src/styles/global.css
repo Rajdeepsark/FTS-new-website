@@ -2,6 +2,7 @@
 
 @theme {
   --font-sans: "Inter", "Avenir Next", Avenir, sans-serif;
+  --font-tight: "Inter Tight", "Inter", "Avenir Next", Avenir, sans-serif;
   --color-ink: #16251f;
   --color-muted: #66736d;
   --color-paper: #f7f8f4;
