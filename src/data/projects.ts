@@ -5,9 +5,9 @@
  * feature, then a pair. In each pair the first entry is the left card (image
  * above its caption) and the second is the right card (caption above its image).
  *
- * `image` files live in `public/projects/`. The current files are temporary
- * stills from the studio's own footage; replace them with the real posters,
- * keeping the file names, or point `src` somewhere else.
+ * `image` files live in `public/projects/` and are the poster exports from the
+ * design file, saved as JPEG at their export size. To update one, replace the
+ * file keeping its name, or point `src` somewhere else.
  *
  * `href` is a placeholder for every project until case-study pages and video
  * links exist.
@@ -88,17 +88,16 @@ export const projects: Project[] = [
     },
   },
   {
-    // The design file repeats project 01's caption here; swap in the real
-    // sixth project when it is decided.
+    // The design file repeats project 01's caption here, so the description is
+    // only the name from the poster until the real caption is written.
     number: "05",
-    title: "The Scroll That Stole Time",
-    description:
-      "The Scroll That Stole Time: A debut short film shot in Guwahati, exploring how social media quietly steals our lives away. Currently in film festival circuit.",
+    title: "River City Sound Sessions",
+    description: "River City Sound Sessions.",
     action: "watch",
     href: "/projects",
     image: {
       src: "/projects/project-05.jpg",
-      alt: "Still from The Scroll That Stole Time",
+      alt: "Title card for River City Sound Sessions",
     },
   },
 ];
