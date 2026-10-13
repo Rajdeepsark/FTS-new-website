@@ -15,9 +15,10 @@
  *               1px specular rim, brightest top-left and bottom-right, and an
  *               inner glow
  *   refraction  Chromium only, switched on by the script, for the links capsule
- *               in the light tone: the SVG filter below replaces the blur. It
- *               frosts the middle the same way and bends a clearer, brighter
- *               copy of the backdrop inward along a 13px bezel
+ *               in the light tone: the SVG lens from `scripts/glassLens.ts`
+ *               replaces the blur. It frosts the middle the same way and bends
+ *               a clearer, brighter copy of the backdrop inward along a 13px
+ *               bezel
  *   lozenge     a highlight that glides between the links under the pointer or
  *               keyboard focus and rests on the current page's link
  *   touch       only the things you can press respond: links and the button dip
@@ -68,54 +69,6 @@ const links = [
   >
     Talk to us
   </a>
-
-  {
-    /* Lens for the links capsule in the light tone. The script draws the map: red
-       and green are the x and y shift (mid-grey = none), blue is how much of the
-       bezel shows. Two copies of the backdrop are merged:
-         body   frosted, squeezed into 12%–36% brightness so the white lettering
-                reads on anything, then given its colour back
-         bezel  nearly clear, shifted by the map and left brighter, shown only
-                along the rim */
-  }
-  <svg class="absolute size-0" aria-hidden="true" focusable="false">
-    <filter
-      id="floating-nav-lens"
-      x="0"
-      y="0"
-      width="100%"
-      height="100%"
-      color-interpolation-filters="sRGB"
-      primitiveUnits="userSpaceOnUse"
-    >
-      <feImage x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map" data-nav-lens-map></feImage>
-
-      <feGaussianBlur in="SourceGraphic" stdDeviation="9" edgeMode="duplicate"></feGaussianBlur>
-      <feComponentTransfer>
-        <feFuncR type="linear" slope="0.24" intercept="0.12"></feFuncR>
-        <feFuncG type="linear" slope="0.24" intercept="0.12"></feFuncG>
-        <feFuncB type="linear" slope="0.24" intercept="0.12"></feFuncB>
-      </feComponentTransfer>
-      <feColorMatrix type="saturate" values="2" result="body"></feColorMatrix>
-
-      <feGaussianBlur in="SourceGraphic" stdDeviation="2" edgeMode="duplicate"></feGaussianBlur>
-      <feDisplacementMap in2="map" scale="-44" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
-      <feComponentTransfer>
-        <feFuncR type="linear" slope="0.55" intercept="0.1"></feFuncR>
-        <feFuncG type="linear" slope="0.55" intercept="0.1"></feFuncG>
-        <feFuncB type="linear" slope="0.55" intercept="0.1"></feFuncB>
-      </feComponentTransfer>
-      <feColorMatrix type="saturate" values="1.5" result="bent"></feColorMatrix>
-      <feColorMatrix in="map" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 1 0 0" result="rim"
-      ></feColorMatrix>
-      <feComposite in="bent" in2="rim" operator="in" result="bezel"></feComposite>
-
-      <feMerge>
-        <feMergeNode in="body"></feMergeNode>
-        <feMergeNode in="bezel"></feMergeNode>
-      </feMerge>
-    </filter>
-  </svg>
 </nav>
 
 <style>
@@ -202,9 +155,9 @@ const links = [
   /* Refraction, for the links capsule in the light tone (the dark tone only ever sits
      on flat paper, where there is nothing to bend). The lens filter frosts and
      grades the backdrop itself, so it replaces the whole list above. */
-  nav[data-refract][data-tone="light"] .glass:not(.glass-prominent) {
-    -webkit-backdrop-filter: url(#floating-nav-lens);
-    backdrop-filter: url(#floating-nav-lens);
+  nav[data-tone="light"] .glass[data-refract] {
+    -webkit-backdrop-filter: var(--glass-lens);
+    backdrop-filter: var(--glass-lens);
   }
 
   /* The button: glass tinted almost to white, in either tone. */
@@ -288,7 +241,7 @@ const links = [
 
   @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
     .glass,
-    nav[data-refract][data-tone="light"] .glass:not(.glass-prominent) {
+    nav[data-tone="light"] .glass[data-refract] {
       background-color: var(--glass-solid);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -312,10 +265,11 @@ const links = [
 </style>
 
 <script>
+  import { refract } from "../scripts/glassLens";
+
   const nav = document.querySelector<HTMLElement>("[data-floating-nav]");
   const list = nav?.querySelector<HTMLElement>("[data-nav-links]");
   const lozenge = list?.querySelector<HTMLElement>("[data-nav-lozenge]");
-  const lensMap = nav?.querySelector<SVGFEImageElement>("[data-nav-lens-map]");
 
   // ---- Tone -------------------------------------------------------------------
   const zones = document.querySelectorAll<HTMLElement>("[data-nav-tone]");
@@ -380,74 +334,6 @@ const links = [
   }
 
   // ---- Refraction ---------------------------------------------------------------
-  // Chromium is the only engine that runs an SVG filter as a backdrop-filter;
-  // elsewhere the declaration would switch the glass off, so it is opt-in. The map
-  // tells the filter how far to shift each pixel: along the capsule's edge normal,
-  // strongest at the rim and fading to nothing one bezel in. The filter's negative
-  // scale turns that into an inward pull, so the rim shows what lies deeper under
-  // the glass, squeezed, the way a thick lens edge does.
-  type Brands = { brands?: { brand: string }[] };
-  const chromium = (navigator as Navigator & { userAgentData?: Brands }).userAgentData?.brands?.some(
-    ({ brand }) => brand === "Chromium",
-  );
-
-  if (nav && list && lensMap && chromium) {
-    const BEZEL = 13; // px of rim that bends light
-    const canvas = document.createElement("canvas");
-    const ink = canvas.getContext("2d");
-
-    const draw = () => {
-      const width = list.offsetWidth;
-      const height = list.offsetHeight;
-      if (!ink || !width || !height) return;
-
-      canvas.width = width;
-      canvas.height = height;
-      const map = ink.createImageData(width, height);
-      const halfW = width / 2;
-      const halfH = height / 2;
-      const radius = Math.min(halfW, halfH);
-
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          // Signed distance to the capsule's edge, and the edge normal there.
-          const px = x + 0.5 - halfW;
-          const py = y + 0.5 - halfH;
-          const qx = Math.abs(px) - (halfW - radius);
-          const qy = Math.abs(py) - (halfH - radius);
-          const ox = Math.max(qx, 0);
-          const oy = Math.max(qy, 0);
-          const reach = Math.hypot(ox, oy);
-          const depth = radius - reach - Math.min(Math.max(qx, qy), 0);
-
-          let nx = 0;
-          let ny = 0;
-          if (reach > 0) {
-            nx = (ox / reach) * Math.sign(px);
-            ny = (oy / reach) * Math.sign(py);
-          } else if (qx > qy) nx = Math.sign(px);
-          else ny = Math.sign(py);
-
-          // 0 at the rim, 1 one bezel in. The shift eases out over the whole
-          // bezel; the bezel itself stays solid for its outer fifth, then fades.
-          const t = Math.min(1, Math.max(0, depth / BEZEL));
-          const bend = (1 - t) ** 2;
-          const fade = Math.min(1, Math.max(0, (t - 0.2) / 0.8));
-          const i = (y * width + x) * 4;
-          map.data[i] = 128 + 127 * nx * bend;
-          map.data[i + 1] = 128 + 127 * ny * bend;
-          map.data[i + 2] = 255 * (1 - fade * fade * (3 - 2 * fade));
-          map.data[i + 3] = 255;
-        }
-      }
-
-      ink.putImageData(map, 0, 0);
-      lensMap.setAttribute("href", canvas.toDataURL());
-      lensMap.setAttribute("width", String(width));
-      lensMap.setAttribute("height", String(height));
-      nav.setAttribute("data-refract", "");
-    };
-
-    new ResizeObserver(draw).observe(list);
-  }
+  // The links capsule gets a lens; the style block uses it in the light tone only.
+  if (list) refract(list);
 </script>
