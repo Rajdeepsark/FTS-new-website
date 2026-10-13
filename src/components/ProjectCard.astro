@@ -7,8 +7,11 @@
  *   image-first    half-width card: 646 × 448 poster, caption underneath
  *   caption-first  half-width card: caption on top, poster fills the rest of the row
  *
- * Pill (Figma "Header"): padding 16px 32px · radius 120px · white/10 fill and border ·
- * Inter 400 · 13/14 · uppercase · white. "Watch" pills add a 16px play glyph.
+ * Pill (Figma "Header"): padding 16px 32px · radius 120px · Inter 400 · 13/14 ·
+ * uppercase · white. "Watch" pills add a 16px play glyph. It is finished in the
+ * floating nav's glass (light tone; see the style block). Where there is a pointer
+ * to hover with, it shows only while the pointer is over the poster or the pill
+ * has keyboard focus; touch screens keep it in view.
  *
  * Scroll parallax, y axis only (skipped under prefers-reduced-motion and without
  * JS): the image is zoomed 10% inside its frame and drops 6% of the frame height
@@ -39,7 +42,7 @@ const posterShape = {
 <article class:list={["flex flex-col", variant === "feature" && "md:relative md:isolate", variant !== "feature" && "md:h-full"]}>
   {variant === "caption-first" && <ProjectCaption number={number} description={description} />}
 
-  <div class:list={["relative isolate w-full overflow-hidden bg-[#1a1917]", posterShape]}>
+  <div class:list={["poster relative isolate w-full overflow-hidden bg-[#1a1917]", posterShape]}>
     {
       image ? (
         <img
@@ -70,9 +73,10 @@ const posterShape = {
     }
 
     <a
-      class="absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-3 whitespace-nowrap rounded-[120px] border border-white/10 bg-white/10 px-6 py-3 text-[13px] font-normal uppercase leading-[14px] text-white backdrop-blur-md transition-colors hover:bg-white/20 sm:px-8 sm:py-4"
+      class="pill absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-3 whitespace-nowrap px-6 py-3 text-[13px] font-normal uppercase leading-[14px] sm:px-8 sm:py-4"
       href={href}
       aria-label={`${label}: ${title}`}
+      data-project-pill
     >
       {
         action === "watch" && (
@@ -100,7 +104,121 @@ const posterShape = {
   {variant === "feature" && <ProjectCaption number={number} description={description} class="md:hidden" />}
 </article>
 
+<style>
+  /* ---- Pill: the floating nav's glass, in its light tone -------------------------
+     A blur, then a brightness squeeze that keeps the white lettering legible on any
+     poster, then the colour put back; a 1px specular rim and an inner glow on top.
+     In Chromium the script swaps the blur for the refracting lens. */
+  .pill {
+    --pill-tint: rgb(255 255 255 / 0);
+    border-radius: 120px;
+    background-color: var(--pill-tint);
+    -webkit-backdrop-filter: blur(16px) contrast(0.5) brightness(0.48) saturate(200%);
+    backdrop-filter: blur(16px) contrast(0.5) brightness(0.48) saturate(200%);
+    box-shadow:
+      0 12px 32px -12px rgb(0 0 0 / 0.5),
+      inset 0 1px 0 rgb(255 255 255 / 0.2),
+      inset 0 0 14px rgb(255 255 255 / 0.07);
+    color: #fff;
+    transition:
+      opacity 0.3s ease,
+      transform 0.5s cubic-bezier(0.3, 1.35, 0.45, 1),
+      background-color 0.3s ease;
+  }
+
+  .pill[data-refract] {
+    -webkit-backdrop-filter: var(--glass-lens);
+    backdrop-filter: var(--glass-lens);
+  }
+
+  /* Specular rim: a 1px ring, lit from the top left and catching light again at the
+     bottom right. The mask keeps only the ring of the gradient. */
+  .pill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      140deg,
+      rgb(255 255 255 / 0.6) 0%,
+      rgb(255 255 255 / 0.08) 30%,
+      rgb(255 255 255 / 0.08) 66%,
+      rgb(255 255 255 / 0.6) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+
+  /* ---- Reveal -------------------------------------------------------------------
+     Where there is a pointer to hover with, the pill waits for it to reach the
+     poster, or for keyboard focus. Touch screens keep the pill in view. */
+  @media (hover: hover) {
+    .pill {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    .poster:hover .pill,
+    .pill:focus-visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .pill:hover {
+      --pill-tint: rgb(255 255 255 / 0.08);
+    }
+  }
+
+  .pill:active,
+  .poster:hover .pill:active {
+    transform: scale(0.96);
+  }
+
+  .pill:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* ---- Fallback: no backdrop-filter, or the visitor asked for a plainer screen -- */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .pill {
+      background-color: #262523;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    .pill,
+    .pill[data-refract] {
+      background-color: #262523;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  /* The pill still fades in and out, but it does not grow or dip. */
+  @media (prefers-reduced-motion: reduce) {
+    .pill,
+    .pill:active,
+    .poster:hover .pill:active {
+      transform: none;
+      transition: opacity 0.3s ease;
+    }
+  }
+</style>
+
 <script>
+  import { refract } from "../scripts/glassLens";
+
+  // Each pill gets a lens for its glass (Chromium only; see the style block).
+  document.querySelectorAll<HTMLElement>("[data-project-pill]").forEach((pill) => refract(pill));
+
   const images = [...document.querySelectorAll<HTMLElement>("[data-parallax]")];
   const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
 
