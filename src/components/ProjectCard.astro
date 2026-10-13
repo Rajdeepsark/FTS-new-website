@@ -12,9 +12,10 @@
  *
  * Scroll parallax, y axis only (skipped under prefers-reduced-motion and without
  * JS): the image is zoomed 10% inside its frame and drops 6% of the frame height
- * while the poster's centre is between 60% and 70% of the way up the screen (0% is
- * the bottom edge, 100% the top). It eases in and out of that range and holds its
- * end position outside it. The pill, gradient and caption stay put.
+ * while the poster's centre is between 45% and 85% of the way up the screen (0% is
+ * the bottom edge, 100% the top). It eases in and out of that range, holds its end
+ * position outside it, and trails the scroll slightly so it glides to wherever the
+ * scroll puts it. The pill, gradient and caption stay put.
  */
 import type { Project } from "../data/projects";
 import ProjectCaption from "./ProjectCaption.astro";
@@ -100,45 +101,68 @@ const posterShape = {
 </article>
 
 <script>
-  const images = document.querySelectorAll<HTMLElement>("[data-parallax]");
+  const images = [...document.querySelectorAll<HTMLElement>("[data-parallax]")];
   const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
 
   if (images.length) {
     const ZOOM = 1.1;
     // The stretch of the screen the slide runs over, as the height of the poster's
     // centre (0 = bottom edge, 1 = top edge).
-    const FROM = 0.6;
-    const TO = 0.7;
+    const FROM = 0.45;
+    const TO = 0.85;
     // How far the image slides over it, in % of its frame. The zoom leaves ±5% of slack.
     const TRAVEL = 6;
+    // Seconds the image takes to close about two thirds of the gap to where the
+    // scroll puts it, so a fast flick through the range glides instead of jumping.
+    const LAG = 0.18;
 
-    let queued = false;
+    // Where each image sits now, in % of its frame (null until it is first placed).
+    const shown: (number | null)[] = images.map(() => null);
+    let running = false;
+    let last = 0;
 
-    const render = () => {
-      queued = false;
-      for (const image of images) {
+    const tick = (now: number) => {
+      const elapsed = last ? Math.min(now - last, 100) : 1000 / 60;
+      const pull = 1 - Math.exp(-elapsed / 1000 / LAG);
+      last = now;
+
+      let settled = true;
+      images.forEach((image, i) => {
         const frame = image.parentElement?.getBoundingClientRect();
         if (!motion.matches || !frame) {
           image.style.removeProperty("transform");
-          continue;
+          shown[i] = null;
+          return;
         }
         const height = 1 - (frame.top + frame.height / 2) / window.innerHeight;
         const t = Math.min(1, Math.max(0, (height - FROM) / (TO - FROM)));
-        const y = (t * t * (3 - 2 * t) - 0.5) * TRAVEL; // smoothstep, centred on zero
+        const goal = (t * t * (3 - 2 * t) - 0.5) * TRAVEL; // smoothstep, centred on zero
+        const from = shown[i] ?? goal; // the first placement lands straight on the goal
+        const y = Math.abs(goal - from) < 0.01 ? goal : from + (goal - from) * pull;
+        if (y !== goal) settled = false;
+        shown[i] = y;
         image.style.transform = `translateY(${y.toFixed(3)}%) scale(${ZOOM})`;
+      });
+
+      if (settled) {
+        running = false;
+        last = 0;
+      } else {
+        requestAnimationFrame(tick);
       }
     };
 
     const schedule = () => {
-      if (!queued) {
-        queued = true;
-        requestAnimationFrame(render);
+      if (!running) {
+        running = true;
+        requestAnimationFrame(tick);
       }
     };
 
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
     motion.addEventListener("change", schedule);
-    render();
+    running = true;
+    tick(performance.now());
   }
 </script>
