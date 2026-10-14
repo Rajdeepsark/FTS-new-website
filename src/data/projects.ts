@@ -85,7 +85,8 @@ export const projects: Project[] = [
     description:
       "Waikato Museum Showcase (Edited in New Zealand). A highlight reel for one of New Zealand’s leading art and cultural museums in the district of Waikato.",
     action: "watch",
-    href: PLACEHOLDER_VIDEO,
+    // "Portrait of Waikato Museum by Wintec students" on the museum's YouTube channel.
+    href: "https://www.youtube.com/watch?v=YHH0eG30mV8",
     image: {
       src: "/projects/waikato-museum-showcase.jpg",
       alt: "Still from the Waikato Museum showcase",
