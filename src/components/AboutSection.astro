@@ -34,7 +34,8 @@
  * the bottom card only moves down, away from the text. Paths are in design pixels,
  * so they scale with the frame from `lg` up; below it they are halved.
  *
- * The photos live in `public/about/`, cropped to their card shapes. The design
+ * The photos live in `public/about/`, cropped to their card shapes from the
+ * 1100 × 701 originals in `public/services/` (photography.jpg, ad-films.jpg). The design
  * repeats "( 01 ) The Scroll That Stole Time" under all three as a placeholder; the
  * photos are not stills from a project, so each card is captioned with what it
  * shows instead.
@@ -73,10 +74,10 @@ const cards: Card[] = [
   },
   {
     number: "02",
-    caption: "Bare branches at dusk",
+    caption: "A festival after dark",
     image: {
-      src: "/about/tree-branches.jpg",
-      alt: "Bare tree branches against a blue evening sky",
+      src: "/about/festival-night.jpg",
+      alt: "A crowd on a hillside above a festival ground lit up at night",
       width: 789,
       height: 701,
     },
@@ -92,10 +93,10 @@ const cards: Card[] = [
   },
   {
     number: "03",
-    caption: "A festival after dark",
+    caption: "Bare branches at dusk",
     image: {
-      src: "/about/festival-night.jpg",
-      alt: "A crowd on a hillside above a festival ground lit up at night",
+      src: "/about/tree-branches.jpg",
+      alt: "Bare tree branches against a blue evening sky",
       width: 1100,
       height: 587,
     },
