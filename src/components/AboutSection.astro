@@ -9,13 +9,21 @@
  *               level with the first heading line; heading 48/120% · -0.03em with
  *               serif runs at the same size; body Inter 400 · 20/150% · -0.02em,
  *               32px under the heading. All left-aligned
- *   cards       three project cards scattered around the statement, each a picture
- *               with "( 01 )" (Inter 500 · 14/14 · uppercase · 50%) and the project
- *               title (Inter 400 · 14/130% · -0.03em) under it:
+ *   cards       three of the studio's photos scattered around the statement (the
+ *               design's own pictures), each with "( 01 )" (Inter 500 · 14/14 ·
+ *               uppercase · 50%) and a caption (Inter 400 · 14/130% · -0.03em) under it:
  *                 left    219 × 170 at (71, 381)
  *                 right   181 × 160 at (1259, 292), flush with the right edge
  *                 bottom  410 × 220 at (839, 601)
  *               Below `lg` they drop into a loose two-column grid under the text.
+ *
+ * From `lg` up the section is one screen tall (100svh) and the frame is scaled to
+ * fit inside it: `--u` is one design pixel, the smaller of a 1440th of the width and
+ * a 905th of the height, and every size, gap and vertical position in the frame is a
+ * multiple of it, so the statement and the cards never run into each other however
+ * short the screen. A screen taller than the scaled frame centres it vertically.
+ * Across the width the cards keep their place as a share of the screen (the right
+ * one flush with its edge) and the statement stays centred.
  *
  * Scroll drift (skipped under prefers-reduced-motion and without JS): while the
  * section crosses the screen, each card slides a few dozen pixels along its own
@@ -23,81 +31,101 @@
  * A card is at `from` when the section's top enters at the bottom of the screen and
  * at `to` when its bottom leaves at the top, and it trails the scroll slightly so it
  * glides. The right card only moves further off its edge, never away from it, and
- * the bottom card only moves down, away from the text. Paths are halved below `lg`.
+ * the bottom card only moves down, away from the text. Paths are in design pixels,
+ * so they scale with the frame from `lg` up; below it they are halved.
  *
- * Cards take their number, title and picture from `src/data/projects.ts` (the
- * project's `still` where it has one). The design repeats "( 01 ) The Scroll That
- * Stole Time" under all three as a placeholder.
+ * The photos live in `public/about/`, cropped to their card shapes. The design
+ * repeats "( 01 ) The Scroll That Stole Time" under all three as a placeholder; the
+ * photos are not stills from a project, so each card is captioned with what it
+ * shows instead.
  */
-import { projects, type Project } from "../data/projects";
-
-interface Pick {
-  /** Project number in `src/data/projects.ts`. */
+interface Card {
   number: string;
+  caption: string;
+  image: { src: string; alt: string; width: number; height: number };
   aspect: string;
-  /** Design position and width, `lg` and up. */
+  /** Horizontal place, `lg` and up. */
   place: string;
+  /** Top and width in design pixels, `lg` and up. */
+  top: number;
+  width: number;
   /** Placement in the grid below `lg`. */
   grid: string;
   /** Extra classes for the caption. */
-  caption?: string;
-  /** Drift path in px, [x, y] at the start and at the end of the section's pass. */
+  captionClass?: string;
+  /** Drift path in design px, [x, y] at the start and at the end of the section's pass. */
   from: [number, number];
   to: [number, number];
 }
 
-const picks: Pick[] = [
+const cards: Card[] = [
   {
     number: "01",
+    caption: "Sunset over the lake",
+    image: { src: "/about/lake-sunset.jpg", alt: "The sun setting over a lake and hills", width: 901, height: 701 },
     aspect: "aspect-[9/7]",
-    place: "lg:left-[4.9%] lg:top-[381px] lg:w-[15.2%]",
+    place: "lg:left-[4.9%]",
+    top: 381,
+    width: 219,
     grid: "",
     from: [16, 36],
     to: [-16, -36],
   },
   {
-    number: "04",
+    number: "02",
+    caption: "Bare branches at dusk",
+    image: {
+      src: "/about/tree-branches.jpg",
+      alt: "Bare tree branches against a blue evening sky",
+      width: 789,
+      height: 701,
+    },
     aspect: "aspect-[9/8]",
-    place: "lg:left-[87.4%] lg:top-[292px] lg:w-[12.6%]",
+    place: "lg:right-0",
+    top: 292,
+    width: 181,
     grid: "mt-12",
-    // Keeps the title clear of the edge the card drifts off.
-    caption: "lg:pr-6",
+    // Keeps the caption clear of the edge the card drifts off.
+    captionClass: "lg:pr-6",
     from: [0, 48],
     to: [24, -48],
   },
   {
-    number: "06",
+    number: "03",
+    caption: "A festival after dark",
+    image: {
+      src: "/about/festival-night.jpg",
+      alt: "A crowd on a hillside above a festival ground lit up at night",
+      width: 1100,
+      height: 587,
+    },
     aspect: "aspect-[15/8]",
-    place: "lg:left-[58.3%] lg:top-[601px] lg:w-[28.5%]",
+    place: "lg:left-[58.3%]",
+    top: 601,
+    width: 410,
     grid: "col-span-2 w-3/4 justify-self-end",
     from: [-20, 0],
     to: [20, 32],
   },
 ];
-
-const cards = picks.flatMap((pick) => {
-  const project = projects.find((p: Project) => p.number === pick.number);
-  const picture = project?.still ?? project?.image;
-  return project && picture ? [{ ...pick, project, picture }] : [];
-});
 ---
 
 <section
   id="about"
-  class="relative overflow-hidden bg-cream px-4 py-16 sm:px-8 lg:h-[905px] lg:px-0 lg:pb-0 lg:pt-[108px] 2xl:h-[62.8vw]"
+  class="about relative overflow-hidden bg-cream px-4 py-16 sm:px-8"
   aria-labelledby="about-heading"
   data-about
 >
-  <div class="mx-auto grid max-w-[506px] gap-y-6 md:grid-cols-[90px_1fr]">
-    <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px] text-night md:mt-4 md:whitespace-nowrap">
+  <div class="statement mx-auto grid max-w-[506px] gap-y-6 md:grid-cols-[90px_1fr]">
+    <p class="label pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px] text-night md:mt-4 md:whitespace-nowrap">
       ( We are )
     </p>
-    <h2 id="about-heading" class="text-[36px] font-normal leading-[120%] tracking-[-0.03em] text-night sm:text-[48px]">
+    <h2 id="about-heading" class="heading text-[36px] font-normal leading-[120%] tracking-[-0.03em] text-night sm:text-[48px]">
       <span class="font-serif">A Creative Studio</span><br />
       for meaningful<br />
       <span class="font-serif">Storytelling</span>
     </h2>
-    <div class="space-y-7 text-[17px] leading-[150%] tracking-[-0.02em] text-night sm:text-[20px] md:col-start-2 md:mt-2">
+    <div class="body space-y-7 text-[17px] leading-[150%] tracking-[-0.02em] text-night sm:text-[20px] md:col-start-2 md:mt-2">
       <p>
         Flying Turtle Studio is a creative production house built on the belief that the most memorable
         stories come from thinking beyond the obvious.
@@ -111,31 +139,93 @@ const cards = picks.flatMap((pick) => {
 
   <div class="mt-14 grid grid-cols-2 gap-x-4 gap-y-10 lg:contents">
     {
-      cards.map(({ project, picture, aspect, place, grid, caption, from, to }) => (
+      cards.map(({ number, caption, image, aspect, place, top, width, grid, captionClass, from, to }) => (
         <figure
-          class:list={["flex flex-col will-change-transform lg:absolute lg:m-0", grid, place]}
+          class:list={["card flex flex-col will-change-transform", grid, place]}
+          style={`--card-top: ${top}; --card-width: ${width}`}
           data-drift={[...from, ...to].join(" ")}
         >
           <div class:list={["relative w-full overflow-hidden bg-[#e4ddd4]", aspect]}>
             <img
               class="absolute inset-0 size-full object-cover"
-              src={picture.src}
-              alt={picture.alt}
-              width="820"
-              height="560"
+              src={image.src}
+              alt={image.alt}
+              width={image.width}
+              height={image.height}
               loading="lazy"
               decoding="async"
             />
           </div>
-          <figcaption class:list={["mt-3", caption]}>
-            <p class="text-[14px] font-medium uppercase leading-[14px] text-night/50">( {project.number} )</p>
-            <p class="mt-1.5 text-[14px] leading-[130%] tracking-[-0.03em] text-night">{project.title}</p>
+          <figcaption class:list={["mt-3", captionClass]}>
+            <p class="card-number text-[14px] font-medium uppercase leading-[14px] text-night/50">( {number} )</p>
+            <p class="card-title mt-1.5 text-[14px] leading-[130%] tracking-[-0.03em] text-night">{caption}</p>
           </figcaption>
         </figure>
       ))
     }
   </div>
 </section>
+
+<style>
+  /* One screen tall from `lg` up, with the design frame scaled to fit (see the top
+     of the file). These rules sit outside Tailwind's layers, so they win over the
+     utility classes in the markup, which size everything below `lg`. */
+  @media (min-width: 64rem) {
+    .about {
+      --u: min(calc(100vw / 1440), calc(100svh / 905));
+      --frame-top: calc((100svh - 905 * var(--u)) / 2);
+      height: 100svh;
+      padding: calc(var(--frame-top) + 108 * var(--u)) 0 0;
+    }
+
+    .statement {
+      max-width: calc(506 * var(--u));
+      grid-template-columns: calc(90 * var(--u)) 1fr;
+      row-gap: calc(24 * var(--u));
+    }
+
+    .label {
+      margin-top: calc(16 * var(--u));
+      padding: calc(4.7 * var(--u)) 0 calc(5.71 * var(--u));
+      font-size: calc(14 * var(--u));
+      line-height: calc(14 * var(--u));
+    }
+
+    .heading {
+      font-size: calc(48 * var(--u));
+    }
+
+    .body {
+      margin-top: calc(8 * var(--u));
+      font-size: calc(20 * var(--u));
+    }
+
+    .body > :not(:last-child) {
+      margin-block-end: calc(28 * var(--u));
+    }
+
+    .card {
+      position: absolute;
+      margin: 0;
+      top: calc(var(--frame-top) + var(--card-top) * var(--u));
+      width: calc(var(--card-width) * var(--u));
+    }
+
+    .card figcaption {
+      margin-top: calc(12 * var(--u));
+    }
+
+    .card-number {
+      font-size: calc(14 * var(--u));
+      line-height: calc(14 * var(--u));
+    }
+
+    .card-title {
+      margin-top: calc(6 * var(--u));
+      font-size: calc(14 * var(--u));
+    }
+  }
+</style>
 
 <script>
   const section = document.querySelector<HTMLElement>("[data-about]");
@@ -176,7 +266,8 @@ const cards = picks.flatMap((pick) => {
       const t = Math.abs(goal - from) < 0.0005 ? goal : from + (goal - from) * pull;
       shown = t;
 
-      const reach = wide.matches ? 1 : 0.5;
+      // Paths are in design pixels: scaled with the frame from `lg` up, halved below.
+      const reach = wide.matches ? Math.min(window.innerWidth / 1440, window.innerHeight / 905) : 0.5;
       for (const { el, x0, y0, x1, y1 } of cards) {
         const x = (x0 + (x1 - x0) * t) * reach;
         const y = (y0 + (y1 - y0) * t) * reach;
