@@ -14,7 +14,9 @@
  *
  * Set `uncropped` when the image carries lettering of its own, like a release
  * poster: the card then shows all of it (see `ProjectCard`), so give the image's
- * pixel size as `width` and `height`.
+ * pixel size as `width` and `height`. Such a project can also give a `still`, a
+ * frame without lettering for places that crop the picture small (the About
+ * section's cards).
  */
 export type ProjectAction = "case-study" | "watch";
 
@@ -30,6 +32,8 @@ export interface Project {
   image: { src: string; alt: string; width?: number; height?: number } | null;
   /** Show the whole image: no crop, no parallax zoom, caption underneath. */
   uncropped?: boolean;
+  /** A frame without lettering, used instead of `image` where it is cropped small. */
+  still?: { src: string; alt: string };
 }
 
 export const projects: Project[] = [
@@ -47,6 +51,10 @@ export const projects: Project[] = [
       height: 900,
     },
     uncropped: true,
+    still: {
+      src: "/projects/the-scroll-that-stole-time-still.jpg",
+      alt: "Still from The Scroll That Stole Time",
+    },
   },
   {
     number: "03",

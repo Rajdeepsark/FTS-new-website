@@ -1,297 +1,208 @@
 ---
 /**
- * Third homepage section: "( We are ) A Creative Studio for meaningful Storytelling",
- * built as a scroll-pinned pictures intro.
+ * Third homepage section: "( We are ) A Creative Studio for meaningful Storytelling".
  *
- *   track     the outer wrapper, 500svh tall while the motion runs, so the page
- *             scrolls 400svh with the stage pinned
- *   stage     sticky top-0 · h-svh · flex items-center: the statement (label,
- *             headline, body), which never moves, with four project cards
- *             floating around it. A card is the container of the design: a 9:7
- *             poster with "( 01 )" (Inter 500 · 14/14 · uppercase · ink at 50%)
- *             and the project title (Inter 400 · 16/130%) under it
- *   body      the two paragraphs under the headline, rendered twice so they always
- *             sit where there is room for them:
- *               pinned  inside the statement, visible for the whole pin. Shown on
- *                       roomy screens (`lg` wide and 39rem tall), where the statement
- *                       fits the stage with the cards at its sides; the stage
- *                       then centres it in the space above the floating nav, and
- *                       under 46rem tall the type drops a step so it still fits
- *               docked  in normal flow after the track, everywhere else. While
- *                       pinned, the script pulls it up by the empty space under the
- *                       headline, so it rises into the stage over the last stretch
- *                       of the pin and meets the headline just as it lets go
+ * Built from the 1440 × 905 design frame (a screenshot; no Figma CSS for this one):
+ *   background  cream #F2EBE3 · #0D0C0B text
+ *   statement   the centred 506px block, 108px from the top: a 90px label column
+ *               beside a 416px text column. Label Inter 500 · 14/14 · uppercase,
+ *               level with the first heading line; heading 48/120% · -0.03em with
+ *               serif runs at the same size; body Inter 400 · 20/150% · -0.02em,
+ *               32px under the heading. All left-aligned
+ *   cards       three project cards scattered around the statement, each a picture
+ *               with "( 01 )" (Inter 500 · 14/14 · uppercase · 50%) and the project
+ *               title (Inter 400 · 14/130% · -0.03em) under it:
+ *                 left    219 × 170 at (71, 381)
+ *                 right   181 × 160 at (1259, 292), flush with the right edge
+ *                 bottom  410 × 220 at (839, 601)
+ *               Below `lg` they drop into a loose two-column grid under the text.
  *
- * Motion: the pinned scroll progress runs 0 → 1 over the track. Each card owns an
- * overlapping slot of it (`start`–`end` below), split into two halves:
- *   first half   ease-out 1 − (1 − t)^2.4 · scale 0.1 → 1 · opacity 0 → 1 · blur 14px → 0
- *   second half  ease-in t² · scale 1 → 3.5 · opacity 1 → 0 · no blur: the card
- *                blows past the camera and is gone
- * The script writes `transform: scale()` and `opacity` on the card, and the blur as
- * `--blur`, which the card's `filter` reads, so poster and caption arrive as one.
- * On the way out the caption fades first (`--caption`, gone a quarter of the way
- * through), so its type does not balloon across the statement with the poster.
+ * Scroll drift (skipped under prefers-reduced-motion and without JS): while the
+ * section crosses the screen, each card slides a few dozen pixels along its own
+ * x/y path (`from` → `to` below), so the three seem to float at different depths.
+ * A card is at `from` when the section's top enters at the bottom of the screen and
+ * at `to` when its bottom leaves at the top, and it trails the scroll slightly so it
+ * glides. The right card only moves further off its edge, never away from it, and
+ * the bottom card only moves down, away from the text. Paths are halved below `lg`.
  *
- * Under prefers-reduced-motion, or without JS, nothing is pinned: the track is one
- * screen tall and the cards sit still around the statement.
- *
- * The statement is the 506px block of the design: a 90px label column beside a
- * 400px text column. Label Inter 500 · 14/14 · uppercase, level with the first
- * heading line; heading 48/115% · -0.03em with serif runs; body Inter 400 · 20/150%,
- * 32px under the heading. All left-aligned, on cream #F2EBE3.
- *
- * Cards take their poster, number and title from `src/data/projects.ts`; `picks`
- * below chooses which projects appear and when.
+ * Cards take their number, title and picture from `src/data/projects.ts` (the
+ * project's `still` where it has one). The design repeats "( 01 ) The Scroll That
+ * Stole Time" under all three as a placeholder.
  */
 import { projects, type Project } from "../data/projects";
 
 interface Pick {
   /** Project number in `src/data/projects.ts`. */
   number: string;
-  /** Slot on the pinned scroll progress (0 → 1). */
-  start: number;
-  end: number;
-  /** Corner and width on the stage: phones, then `md`, then `lg` and up. */
+  aspect: string;
+  /** Design position and width, `lg` and up. */
   place: string;
+  /** Placement in the grid below `lg`. */
+  grid: string;
+  /** Extra classes for the caption. */
+  caption?: string;
+  /** Drift path in px, [x, y] at the start and at the end of the section's pass. */
+  from: [number, number];
+  to: [number, number];
 }
 
 const picks: Pick[] = [
   {
     number: "01",
-    start: 0,
-    end: 0.42,
-    place: "left-[5%] top-[3%] w-[27vw] md:left-[6%] md:top-[7%] md:w-[20vw] lg:left-[5%] lg:top-[13%] lg:w-[17vw]",
+    aspect: "aspect-[9/7]",
+    place: "lg:left-[4.9%] lg:top-[381px] lg:w-[15.2%]",
+    grid: "",
+    from: [16, 36],
+    to: [-16, -36],
   },
   {
     number: "04",
-    start: 0.18,
-    end: 0.6,
-    place:
-      "right-[5%] bottom-[21%] w-[27vw] md:right-[6%] md:bottom-[14%] md:w-[20vw] lg:right-[5%] lg:bottom-[12%] lg:w-[16vw]",
+    aspect: "aspect-[9/8]",
+    place: "lg:left-[87.4%] lg:top-[292px] lg:w-[12.6%]",
+    grid: "mt-12",
+    // Keeps the title clear of the edge the card drifts off.
+    caption: "lg:pr-6",
+    from: [0, 48],
+    to: [24, -48],
   },
   {
     number: "06",
-    start: 0.36,
-    end: 0.78,
-    place:
-      "left-[7%] bottom-[21%] w-[24vw] md:left-[9%] md:bottom-[14%] md:w-[17vw] lg:left-[15%] lg:bottom-[9%] lg:w-[13vw]",
-  },
-  {
-    number: "03",
-    start: 0.54,
-    end: 0.96,
-    place: "right-[7%] top-[5%] w-[25vw] md:right-[8%] md:top-[9%] md:w-[18vw] lg:right-[10%] lg:top-[9%] lg:w-[14vw]",
+    aspect: "aspect-[15/8]",
+    place: "lg:left-[58.3%] lg:top-[601px] lg:w-[28.5%]",
+    grid: "col-span-2 w-3/4 justify-self-end",
+    from: [-20, 0],
+    to: [20, 32],
   },
 ];
 
 const cards = picks.flatMap((pick) => {
   const project = projects.find((p: Project) => p.number === pick.number);
-  return project?.image ? [{ ...pick, project, image: project.image }] : [];
+  const picture = project?.still ?? project?.image;
+  return project && picture ? [{ ...pick, project, picture }] : [];
 });
-
-const body = [
-  "Flying Turtle Studio is a creative production house built on the belief that the most memorable stories come from thinking beyond the obvious.",
-  "We blend artistry, storytelling, and technical expertise to craft meaningful visual experiences that leave a lasting impact—bringing imagination to life while staying true to what matters most.",
-];
-const bodyType = "space-y-7 text-[17px] leading-[150%] tracking-[-0.02em] text-ink sm:text-[20px]";
 ---
 
-<section id="about" class="relative overflow-x-clip bg-cream" aria-labelledby="about-heading">
-  <div class="data-[animate]:h-[500svh]" data-pictures-track>
-    <div class="stage sticky top-0 flex h-svh items-center px-4 pb-[90px] sm:px-8 lg:pb-0" data-pictures-stage>
-      <div
-        class="statement relative z-10 mx-auto grid w-full max-w-[506px] gap-x-4 gap-y-6 md:grid-cols-[90px_1fr]"
-        data-pictures-headline
-      >
-        <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px] text-ink md:mt-4 md:whitespace-nowrap">
-          ( We are )
-        </p>
-        <h2 id="about-heading" class="text-[36px] font-normal leading-[115%] tracking-[-0.03em] text-ink sm:text-[48px]">
-          <span class="font-serif text-[1.08em] leading-none">A Creative Studio</span><br />
-          for meaningful<br />
-          <span class="font-serif text-[1.08em] leading-none">Storytelling</span>
-        </h2>
-        <div class:list={["body-pinned md:col-start-2 md:mt-2", bodyType]}>
-          {body.map((text) => <p>{text}</p>)}
-        </div>
-      </div>
-
-      {
-        cards.map(({ project, image, start, end, place }) => (
-          <figure
-            class:list={["picture pointer-events-none absolute m-0", place]}
-            data-picture
-            data-start={start}
-            data-end={end}
-          >
-            <div class="relative aspect-[9/7] w-full overflow-hidden bg-[#e4ddd4]">
-              <img
-                class="absolute inset-0 size-full object-cover"
-                src={image.src}
-                alt={image.alt}
-                width="820"
-                height="638"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-            <figcaption class="mt-2 md:mt-3">
-              <p class="text-[12px] font-medium uppercase leading-[12px] text-ink/50 md:text-[14px] md:leading-[14px]">
-                ( {project.number} )
-              </p>
-              <p class="mt-1 text-[13px] leading-[125%] text-ink md:mt-1.5 md:text-[16px] md:leading-[130%]">
-                {project.title}
-              </p>
-            </figcaption>
-          </figure>
-        ))
-      }
+<section
+  id="about"
+  class="relative overflow-hidden bg-cream px-4 py-16 sm:px-8 lg:h-[905px] lg:px-0 lg:pb-0 lg:pt-[108px] 2xl:h-[62.8vw]"
+  aria-labelledby="about-heading"
+  data-about
+>
+  <div class="mx-auto grid max-w-[506px] gap-y-6 md:grid-cols-[90px_1fr]">
+    <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px] text-night md:mt-4 md:whitespace-nowrap">
+      ( We are )
+    </p>
+    <h2 id="about-heading" class="text-[36px] font-normal leading-[120%] tracking-[-0.03em] text-night sm:text-[48px]">
+      <span class="font-serif">A Creative Studio</span><br />
+      for meaningful<br />
+      <span class="font-serif">Storytelling</span>
+    </h2>
+    <div class="space-y-7 text-[17px] leading-[150%] tracking-[-0.02em] text-night sm:text-[20px] md:col-start-2 md:mt-2">
+      <p>
+        Flying Turtle Studio is a creative production house built on the belief that the most memorable
+        stories come from thinking beyond the obvious.
+      </p>
+      <p>
+        We blend artistry, storytelling, and technical expertise to craft meaningful visual experiences that
+        leave a lasting impact—bringing imagination to life while staying true to what matters most.
+      </p>
     </div>
   </div>
 
-  <div class="body-docked relative z-10 px-4 pb-24 pt-6 sm:px-8 md:pt-8 lg:pb-32" data-pictures-body>
-    <div class="mx-auto grid max-w-[506px] gap-x-4 md:grid-cols-[90px_1fr]">
-      <div class:list={["md:col-start-2", bodyType]}>
-        {body.map((text) => <p>{text}</p>)}
-      </div>
-    </div>
+  <div class="mt-14 grid grid-cols-2 gap-x-4 gap-y-10 lg:contents">
+    {
+      cards.map(({ project, picture, aspect, place, grid, caption, from, to }) => (
+        <figure
+          class:list={["flex flex-col will-change-transform lg:absolute lg:m-0", grid, place]}
+          data-drift={[...from, ...to].join(" ")}
+        >
+          <div class:list={["relative w-full overflow-hidden bg-[#e4ddd4]", aspect]}>
+            <img
+              class="absolute inset-0 size-full object-cover"
+              src={picture.src}
+              alt={picture.alt}
+              width="820"
+              height="560"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+          <figcaption class:list={["mt-3", caption]}>
+            <p class="text-[14px] font-medium uppercase leading-[14px] text-night/50">( {project.number} )</p>
+            <p class="mt-1.5 text-[14px] leading-[130%] tracking-[-0.03em] text-night">{project.title}</p>
+          </figcaption>
+        </figure>
+      ))
+    }
   </div>
 </section>
 
-<style>
-  /* Which copy of the body shows. Roomy screens pin it with the headline and lift
-     the statement by half the floating nav's 5rem band, so it centres above it.
-     (Below `lg` the stage keeps 90px clear for the nav, set in the markup, which
-     leaves the cards a band above and below the headline.) */
-  .body-pinned {
-    display: none;
-  }
-
-  @media (min-width: 64rem) and (min-height: 39rem) {
-    .body-pinned {
-      display: block;
-    }
-
-    .body-docked {
-      display: none;
-    }
-
-    .stage {
-      padding-bottom: 5rem;
-    }
-  }
-
-  /* Roomy but short: one type step down, so the statement still fits. */
-  @media (min-width: 64rem) and (min-height: 39rem) and (max-height: 45.99rem) {
-    .statement h2 {
-      font-size: 40px;
-    }
-
-    .body-pinned {
-      font-size: 17px;
-    }
-  }
-
-  /* The script drives scale and opacity inline, and the blur through --blur.
-     A card that has blown past stays in place at 3.5× and fully transparent,
-     which is why the markup takes it out of pointer events. */
-  .picture {
-    transform-origin: center;
-    filter: blur(var(--blur, 0px));
-    will-change: transform, opacity;
-  }
-
-  .picture figcaption {
-    opacity: var(--caption, 1);
-  }
-</style>
-
 <script>
-  const track = document.querySelector<HTMLElement>("[data-pictures-track]");
-  const stage = track?.querySelector<HTMLElement>("[data-pictures-stage]");
-  const headline = track?.querySelector<HTMLElement>("[data-pictures-headline]");
-  const body = document.querySelector<HTMLElement>("[data-pictures-body]");
+  const section = document.querySelector<HTMLElement>("[data-about]");
   const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
+  const wide = window.matchMedia("(min-width: 64rem)");
 
-  if (track && stage && headline && body) {
-    const pictures = Array.from(track.querySelectorAll<HTMLElement>("[data-picture]"), (el) => ({
-      el,
-      start: Number(el.dataset.start),
-      end: Number(el.dataset.end),
-    }));
-    const clamp = (n: number) => Math.min(1, Math.max(0, n));
-    let queued = false;
+  if (section) {
+    const cards = Array.from(section.querySelectorAll<HTMLElement>("[data-drift]"), (el) => {
+      const [x0, y0, x1, y1] = (el.dataset.drift ?? "").split(" ").map(Number);
+      return { el, x0, y0, x1, y1 };
+    });
+    // Seconds the cards take to close about two thirds of the gap to where the
+    // scroll puts them, so a fast flick glides instead of jumping.
+    const LAG = 0.25;
 
-    const render = () => {
-      queued = false;
-      if (!motion.matches) return;
+    // How far the section is through its pass, as shown (null until first placed).
+    let shown: number | null = null;
+    let running = false;
+    let last = 0;
 
-      // 0 when the stage starts to stick, 1 when the track lets it go.
-      const travel = track.offsetHeight - stage.offsetHeight;
-      const progress = travel > 0 ? clamp(-track.getBoundingClientRect().top / travel) : 0;
+    const tick = (now: number) => {
+      if (!motion.matches) {
+        cards.forEach(({ el }) => el.style.removeProperty("transform"));
+        shown = null;
+        running = false;
+        last = 0;
+        return;
+      }
 
-      for (const { el, start, end } of pictures) {
-        const t = clamp((progress - start) / (end - start));
-        let scale: number;
-        let opacity: number;
-        let blur: number;
-        let caption = 1;
+      const elapsed = last ? Math.min(now - last, 100) : 1000 / 60;
+      const pull = 1 - Math.exp(-elapsed / 1000 / LAG);
+      last = now;
 
-        if (t < 0.5) {
-          const eased = 1 - (1 - t * 2) ** 2.4; // ease-out: arrives and settles into focus
-          scale = 0.1 + 0.9 * eased;
-          opacity = eased;
-          blur = 14 * (1 - eased);
-        } else {
-          const eased = (t * 2 - 1) ** 2; // ease-in: accelerates past the camera
-          scale = 1 + 2.5 * eased;
-          opacity = 1 - eased;
-          blur = 0;
-          caption = clamp(1 - eased * 4);
-        }
+      // 0 as the section's top enters at the bottom, 1 as its bottom leaves at the top.
+      const box = section.getBoundingClientRect();
+      const goal = Math.min(1, Math.max(0, (window.innerHeight - box.top) / (window.innerHeight + box.height)));
+      const from = shown ?? goal; // the first placement lands straight on the goal
+      const t = Math.abs(goal - from) < 0.0005 ? goal : from + (goal - from) * pull;
+      shown = t;
 
-        el.style.transform = `scale(${scale.toFixed(4)})`;
-        el.style.opacity = opacity.toFixed(4);
-        el.style.setProperty("--blur", `${blur.toFixed(2)}px`);
-        el.style.setProperty("--caption", caption.toFixed(4));
+      const reach = wide.matches ? 1 : 0.5;
+      for (const { el, x0, y0, x1, y1 } of cards) {
+        const x = (x0 + (x1 - x0) * t) * reach;
+        const y = (y0 + (y1 - y0) * t) * reach;
+        el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)`;
+      }
+
+      if (t === goal) {
+        running = false;
+        last = 0;
+      } else {
+        requestAnimationFrame(tick);
       }
     };
 
     const schedule = () => {
-      if (!queued) {
-        queued = true;
-        requestAnimationFrame(render);
+      if (!running) {
+        running = true;
+        requestAnimationFrame(tick);
       }
     };
-
-    // Pins the stage and docks the body under the headline, or undoes both.
-    // The docking is moot on roomy screens, where the docked copy is hidden.
-    const layout = () => {
-      const animate = motion.matches;
-      track.toggleAttribute("data-animate", animate);
-
-      if (animate) {
-        const gap = stage.getBoundingClientRect().bottom - headline.getBoundingClientRect().bottom;
-        body.style.marginTop = `${-Math.max(0, gap)}px`;
-        render();
-      } else {
-        body.style.removeProperty("margin-top");
-        for (const { el } of pictures) {
-          el.style.removeProperty("transform");
-          el.style.removeProperty("opacity");
-          el.style.removeProperty("--blur");
-          el.style.removeProperty("--caption");
-        }
-      }
-    };
-
-    // Covers window resizes and the heading reflowing when the web fonts arrive.
-    const observer = new ResizeObserver(layout);
-    observer.observe(stage);
-    observer.observe(headline);
 
     window.addEventListener("scroll", schedule, { passive: true });
-    motion.addEventListener("change", layout);
-    layout();
+    window.addEventListener("resize", schedule);
+    motion.addEventListener("change", schedule);
+    wide.addEventListener("change", schedule);
+    running = true;
+    tick(performance.now());
   }
 </script>
