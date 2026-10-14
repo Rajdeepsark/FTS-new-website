@@ -7,6 +7,11 @@
  *   image-first    half-width card: 646 × 448 poster, caption underneath
  *   caption-first  half-width card: caption on top, poster fills the rest of the row
  *
+ * An `uncropped` project (an image with lettering of its own, like a release
+ * poster) is shown whole instead: the frame takes the image's shape at every
+ * width, the parallax below leaves it alone, and a feature caption sits under the
+ * poster rather than over it.
+ *
  * Pill (Figma "Header"): padding 16px 32px · radius 120px · Inter 400 · 13/14 ·
  * uppercase · white. "Watch" pills add a 16px play glyph. It is finished in the
  * floating nav's glass (light tone; see the style block). Where there is a pointer
@@ -29,31 +34,38 @@ interface Props {
 }
 
 const { project, variant } = Astro.props;
-const { number, title, description, action, href, image } = project;
+const { number, title, description, action, href, image, uncropped = false } = project;
 const label = action === "watch" ? "Watch" : "View case study";
 
-const posterShape = {
-  feature: "aspect-[4/3] md:aspect-[1312/697]",
-  "image-first": "aspect-[646/448]",
-  "caption-first": "aspect-[646/418] md:aspect-auto md:min-h-0 md:flex-1",
-}[variant];
+// An uncropped image gives the frame its own shape, and a feature caption moves
+// off the poster.
+const wholeShape = uncropped && image?.width && image.height ? `aspect-ratio: ${image.width} / ${image.height}` : undefined;
+const overlay = variant === "feature" && !uncropped;
+
+const posterShape = wholeShape
+  ? ""
+  : {
+      feature: "aspect-[4/3] md:aspect-[1312/697]",
+      "image-first": "aspect-[646/448]",
+      "caption-first": "aspect-[646/418] md:aspect-auto md:min-h-0 md:flex-1",
+    }[variant];
 ---
 
-<article class:list={["flex flex-col", variant === "feature" && "md:relative md:isolate", variant !== "feature" && "md:h-full"]}>
+<article class:list={["flex flex-col", overlay && "md:relative md:isolate", variant !== "feature" && "md:h-full"]}>
   {variant === "caption-first" && <ProjectCaption number={number} description={description} />}
 
-  <div class:list={["poster relative isolate w-full overflow-hidden bg-[#1a1917]", posterShape]}>
+  <div class:list={["poster relative isolate w-full overflow-hidden bg-[#1a1917]", posterShape]} style={wholeShape}>
     {
       image ? (
         <img
           class="absolute inset-0 size-full object-cover will-change-transform"
           src={image.src}
           alt={image.alt}
-          width={variant === "feature" ? 1312 : 646}
-          height={variant === "feature" ? 697 : 448}
+          width={image.width ?? (variant === "feature" ? 1312 : 646)}
+          height={image.height ?? (variant === "feature" ? 697 : 448)}
           loading="lazy"
           decoding="async"
-          data-parallax
+          data-parallax={uncropped ? undefined : true}
         />
       ) : (
         <div
@@ -64,7 +76,7 @@ const posterShape = {
     }
 
     {
-      variant === "feature" && (
+      overlay && (
         <div
           class="absolute inset-x-0 bottom-0 hidden h-1/2 bg-gradient-to-t from-black/60 to-transparent md:block"
           aria-hidden="true"
@@ -89,7 +101,7 @@ const posterShape = {
     </a>
 
     {
-      variant === "feature" && (
+      overlay && (
         <ProjectCaption
           number={number}
           description={description}
@@ -101,7 +113,7 @@ const posterShape = {
   </div>
 
   {variant === "image-first" && <ProjectCaption number={number} description={description} />}
-  {variant === "feature" && <ProjectCaption number={number} description={description} class="md:hidden" />}
+  {variant === "feature" && <ProjectCaption number={number} description={description} class={overlay ? "md:hidden" : ""} />}
 </article>
 
 <style>

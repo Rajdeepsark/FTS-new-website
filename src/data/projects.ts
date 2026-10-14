@@ -11,6 +11,10 @@
  *
  * `href` is a placeholder for every project until case-study pages and video
  * links exist.
+ *
+ * Set `uncropped` when the image carries lettering of its own, like a release
+ * poster: the card then shows all of it (see `ProjectCard`), so give the image's
+ * pixel size as `width` and `height`.
  */
 export type ProjectAction = "case-study" | "watch";
 
@@ -23,7 +27,9 @@ export interface Project {
   description: string;
   action: ProjectAction;
   href: string;
-  image: { src: string; alt: string } | null;
+  image: { src: string; alt: string; width?: number; height?: number } | null;
+  /** Show the whole image: no crop, no parallax zoom, caption underneath. */
+  uncropped?: boolean;
 }
 
 export const projects: Project[] = [
@@ -36,8 +42,11 @@ export const projects: Project[] = [
     href: "/projects",
     image: {
       src: "/projects/the-scroll-that-stole-time.jpg",
-      alt: "Still from The Scroll That Stole Time",
+      alt: "Poster for The Scroll That Stole Time: Phillips Neog lit by his phone, with the FICIMAD 2026 Best Essay Film and FICSAMAS 2025 Official Selection laurels",
+      width: 1600,
+      height: 900,
     },
+    uncropped: true,
   },
   {
     number: "03",
