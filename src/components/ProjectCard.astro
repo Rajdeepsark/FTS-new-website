@@ -15,8 +15,12 @@
  * Pill (Figma "Header"): padding 16px 32px · radius 120px · Inter 400 · 13/14 ·
  * uppercase · white. "Watch" pills add a 16px play glyph. It is finished in the
  * floating nav's glass (light tone; see the style block). Where there is a pointer
- * to hover with, it shows only while the pointer is over the poster or the pill
+ * to hover with, it shows only while the pointer is over the card or the pill
  * has keyboard focus; touch screens keep it in view.
+ *
+ * The whole card, poster and caption, is clickable: a link with the pill's target
+ * covers it for the pointer (a press anywhere dips the pill). It is hidden from
+ * the keyboard and screen readers, for which the pill stays the one link.
  *
  * Scroll parallax, y axis only (skipped under prefers-reduced-motion and without
  * JS): the image is zoomed 10% inside its frame and drops 6% of the frame height
@@ -36,6 +40,9 @@ interface Props {
 const { project, variant } = Astro.props;
 const { number, title, description, action, href, image, uncropped = false } = project;
 const label = action === "watch" ? "Watch" : "View case study";
+// Videos live on YouTube: open them in a new tab so the site stays where it was.
+const external = /^https?:\/\//.test(href);
+const linkTarget = external ? { target: "_blank", rel: "noopener noreferrer" } : {};
 
 // An uncropped image gives the frame its own shape, and a feature caption moves
 // off the poster.
@@ -51,7 +58,7 @@ const posterShape = wholeShape
     }[variant];
 ---
 
-<article class:list={["flex flex-col", overlay && "md:relative md:isolate", variant !== "feature" && "md:h-full"]}>
+<article class:list={["card relative flex flex-col", overlay && "md:isolate", variant !== "feature" && "md:h-full"]}>
   {variant === "caption-first" && <ProjectCaption number={number} description={description} />}
 
   <div class:list={["poster relative isolate w-full overflow-hidden bg-[#1a1917]", posterShape]} style={wholeShape}>
@@ -87,7 +94,8 @@ const posterShape = wholeShape
     <a
       class="pill absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-3 whitespace-nowrap px-6 py-3 text-[13px] font-normal uppercase leading-[14px] sm:px-8 sm:py-4"
       href={href}
-      aria-label={`${label}: ${title}`}
+      {...linkTarget}
+      aria-label={`${label}: ${title}${external ? " (opens in a new tab)" : ""}`}
       data-project-pill
     >
       {
@@ -114,6 +122,8 @@ const posterShape = wholeShape
 
   {variant === "image-first" && <ProjectCaption number={number} description={description} />}
   {variant === "feature" && <ProjectCaption number={number} description={description} class={overlay ? "md:hidden" : ""} />}
+
+  <a class="absolute inset-0 z-10" href={href} {...linkTarget} tabindex="-1" aria-hidden="true" />
 </article>
 
 <style>
@@ -170,26 +180,22 @@ const posterShape = wholeShape
 
   /* ---- Reveal -------------------------------------------------------------------
      Where there is a pointer to hover with, the pill waits for it to reach the
-     poster, or for keyboard focus. Touch screens keep the pill in view. */
+     card, or for keyboard focus. Touch screens keep the pill in view. The cover
+     link takes the pointer, so hover and press are read off the card. */
   @media (hover: hover) {
     .pill {
       opacity: 0;
       transform: scale(0.9);
     }
 
-    .poster:hover .pill,
+    .card:hover .pill,
     .pill:focus-visible {
       opacity: 1;
       transform: none;
     }
-
-    .pill:hover {
-      --pill-tint: rgb(255 255 255 / 0.08);
-    }
   }
 
-  .pill:active,
-  .poster:hover .pill:active {
+  .card:active .pill {
     transform: scale(0.96);
   }
 
@@ -217,8 +223,8 @@ const posterShape = wholeShape
   /* The pill still fades in and out, but it does not grow or dip. */
   @media (prefers-reduced-motion: reduce) {
     .pill,
-    .pill:active,
-    .poster:hover .pill:active {
+    .card:hover .pill,
+    .card:active .pill {
       transform: none;
       transition: opacity 0.3s ease;
     }
