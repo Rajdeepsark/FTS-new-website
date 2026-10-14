@@ -28,14 +28,17 @@
  * the gap and the 32px type shrink together and the text stays clear of the turtle
  * (type stops at 18px). The backdrop covers the footer; when the screen is the
  * limit that crops it top and bottom, and its position keeps the turtle between
- * the text and the bar.
+ * the text and the bar (it shifts on very wide and on very short windows, see the
+ * style block).
  * Below `lg` the text and the bar stack over the same backdrop and the footer is
- * one screen tall, or 640px on screens shorter than that, which is the least the
- * text, the turtle and the bar need.
+ * one screen tall, growing only if the text and the bar need more (landscape
+ * phones). On phones the backdrop starts 9rem down, under the text, so the
+ * turtle's raised flipper stays clear of the address; the picture's top is the
+ * footer's own cream, so no seam shows.
  *
  * The fixed floating nav would sit on top of the bar at the end of the page, and
  * the bar carries the same links, so the script fades the nav out while the bar is
- * on screen. Without JS the nav simply stays.
+ * on screen, unless the nav holds keyboard focus. Without JS the nav simply stays.
  *
  * Not from Figma: the copyright year is the current year (the design says 2024),
  * and the link targets. Instagram is the profile the studio's live site links to;
@@ -65,10 +68,10 @@ const big =
 ---
 
 <footer
-  class="site-footer relative isolate flex min-h-[max(100svh,640px)] flex-col bg-cream text-black lg:h-[min(78.15vw,100svh)] lg:min-h-[520px]"
+  class="site-footer relative isolate flex min-h-svh flex-col bg-cream text-black lg:h-[min(78.15vw,100svh)] lg:min-h-[260px]"
 >
   <img
-    class="absolute inset-0 -z-10 size-full object-cover lg:object-[50%_36%]"
+    class="backdrop absolute inset-0 -z-10 size-full object-cover max-sm:top-36 max-sm:h-[calc(100%-9rem)] max-sm:object-top lg:object-[50%_36%]"
     src="/footer.jpg"
     alt=""
     width="2160"
@@ -91,7 +94,7 @@ const big =
     <div class="flex shrink-0 flex-col items-start justify-between gap-3 lg:self-stretch">
       <p class="text-[14px] font-medium uppercase leading-[14px]">( Contact us today )</p>
       <a class:list={["group inline-flex items-start", big]} href={`mailto:${email}`}>
-        <span class="underline">{email}</span>
+        <span class="underline underline-offset-[0.19em] [text-decoration-thickness:0.07em]">{email}</span>
         <svg
           class="size-[1.343em] shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none"
           viewBox="0 0 24 24"
@@ -109,7 +112,9 @@ const big =
     data-footer-bar
   >
     <nav aria-label="Footer">
-      <ul class="flex flex-wrap items-center gap-x-6 gap-y-1 lg:flex-nowrap">
+      <ul
+        class="flex flex-wrap items-center gap-x-6 gap-y-1 max-[442px]:grid max-[442px]:grid-cols-[repeat(3,max-content)] lg:flex-nowrap"
+      >
         {
           links.map(({ href, label, dot, external }) => (
             <li class="relative isolate">
@@ -129,7 +134,7 @@ const big =
       </ul>
     </nav>
 
-    <p class="text-[16px] leading-[20px] lg:w-[214px] lg:text-center">
+    <p class="w-[214px] text-[16px] leading-[20px] lg:text-center">
       © Flying Turtle Studio {new Date().getFullYear()}. All Rights Reserved
     </p>
 
@@ -149,19 +154,47 @@ const big =
   .site-footer {
     --u: min(0.069444vw, 0.088863svh);
   }
+
+  /* From `lg` the backdrop sits at 50% 36%. Two windows need it elsewhere to keep
+     the turtle off the text and the bar: very wide ones, where it is cropped
+     hardest, and very short ones, where the type has stopped shrinking. */
+  @media (min-width: 64rem) and (min-aspect-ratio: 21 / 9) {
+    .backdrop {
+      object-position: 50% 45%;
+    }
+  }
+
+  @media (min-width: 64rem) and (max-height: 600px) {
+    .backdrop {
+      object-position: 50% 30%;
+    }
+  }
 </style>
 
 <style is:global>
-  /* The floating nav steps aside while the footer bar is on screen (see the script). */
+  /* The floating nav steps aside while the footer bar is on screen (see the script),
+     unless it holds keyboard focus. The fade runs on a registered property that the
+     capsules read, not on the wrapper's own opacity: anything under 1 there would
+     switch off the capsules' backdrop-filter for the length of the fade. */
+  @property --nav-fade {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 1;
+  }
+
   [data-floating-nav] {
     transition:
-      opacity 0.3s ease,
+      --nav-fade 0.3s ease,
       visibility 0.3s;
   }
 
-  [data-floating-nav][data-at-footer] {
+  [data-floating-nav] > * {
+    opacity: var(--nav-fade, 1);
+  }
+
+  [data-floating-nav][data-at-footer]:not(:focus-within) {
     visibility: hidden;
-    opacity: 0;
+    --nav-fade: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -176,6 +209,9 @@ const big =
   const nav = document.querySelector<HTMLElement>("[data-floating-nav]");
 
   if (bar && nav && "IntersectionObserver" in window) {
-    new IntersectionObserver(([entry]) => nav.toggleAttribute("data-at-footer", entry.isIntersecting)).observe(bar);
+    // Several crossings can arrive in one call, oldest first; the last is the current state.
+    new IntersectionObserver((entries) =>
+      nav.toggleAttribute("data-at-footer", entries[entries.length - 1].isIntersecting),
+    ).observe(bar);
   }
 </script>
