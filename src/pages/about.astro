@@ -1,31 +1,31 @@
 ---
+/**
+ * About page: a placeholder while the real page is written. It borrows the homepage
+ * statement's type (label beside a left-aligned heading, body under it) and points
+ * back to the homepage's "( We are )" section in the meantime.
+ */
 import SiteLayout from "../layouts/SiteLayout.astro";
 ---
 
-<SiteLayout
-  title="About"
-  description="Meet Fieldnote Studio: a small independent team creating thoughtful digital experiences."
->
-  <section class="mx-auto max-w-7xl px-6 py-20 sm:py-28 lg:px-10">
-    <p class="text-sm font-semibold uppercase tracking-[0.18em] text-forest">A little about us</p>
-    <h1 class="mt-4 max-w-4xl text-5xl font-semibold leading-tight tracking-[-0.05em] sm:text-7xl">
-      Good things happen when you <span class="text-forest">pay attention.</span>
-    </h1>
-    <div class="mt-12 grid gap-10 border-t border-ink/10 pt-10 md:grid-cols-[1fr_0.8fr]">
-      <p class="text-2xl leading-relaxed tracking-tight">
-        Fieldnote is an independent creative studio for people with a point of view and a positive impact.
+<SiteLayout title="About" description="About Flying Turtle Studio, a creative production house. This page is being written.">
+  <section class="flex min-h-svh items-center bg-cream px-4 pb-32 pt-32 sm:px-8" aria-labelledby="about-page-heading">
+    <div class="mx-auto grid w-full max-w-[506px] gap-y-6 md:grid-cols-[90px_1fr]">
+      <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px] text-night md:mt-4 md:whitespace-nowrap">
+        ( About )
       </p>
-      <div class="space-y-5 leading-7 text-muted">
-        <p>We bring strategy, design, and technology together to make digital work feel more human. No layers of process for process's sake—just a thoughtful team, asking good questions and making useful things.</p>
-        <p>We believe the best work starts with listening. So we stay curious, keep our team intentionally small, and make every collaboration feel like a real partnership.</p>
+      <h1 id="about-page-heading" class="text-[36px] font-normal leading-[120%] tracking-[-0.03em] text-night sm:text-[48px]">
+        <span class="font-serif">Our story</span><br />
+        is still being<br />
+        <span class="font-serif">written</span>
+      </h1>
+      <div class="space-y-7 text-[17px] leading-[150%] tracking-[-0.02em] text-night sm:text-[20px] md:col-start-2 md:mt-2">
+        <p>This page is on its way. Until it is ready, the homepage tells you who we are and what we make.</p>
+        <p>
+          <a class="underline decoration-1 underline-offset-4 transition-opacity hover:opacity-70" href="/#about">
+            Read about the studio
+          </a>
+        </p>
       </div>
-    </div>
-  </section>
-  <section class="bg-forest text-white">
-    <div class="mx-auto grid max-w-7xl gap-8 px-6 py-16 sm:grid-cols-3 lg:px-10">
-      <div><p class="text-3xl font-semibold">Curiosity</p><p class="mt-3 leading-7 text-white/70">We ask better questions before reaching for easy answers.</p></div>
-      <div><p class="text-3xl font-semibold">Clarity</p><p class="mt-3 leading-7 text-white/70">We make the complicated feel considered and clear.</p></div>
-      <div><p class="text-3xl font-semibold">Care</p><p class="mt-3 leading-7 text-white/70">We treat your project—and the people it serves—with intention.</p></div>
     </div>
   </section>
 </SiteLayout>

@@ -16,7 +16,7 @@
  *               address                 Inter 400 · 32/120% · -0.03em · underlined,
  *                                       then a 43px arrow (Material "arrow outward")
  *   bar         72px · padding 16px 64px · white at 10% · space-between
- *               links 13/14 uppercase · gap 24px · 5px dot after PROJECTS and ABOUT
+ *               links 13/14 uppercase · gap 24px · 5px dot after PROJECTS and SERVICES
  *               copyright 16/20, centred, 214px (two lines)
  *               credit 16/20, right-aligned; the two side blocks are both 411px
  *               in Figma, here two equal grid columns, which centres the copyright
@@ -40,9 +40,14 @@
  * the bar carries the same links, so the script fades the nav out while the bar is
  * on screen, unless the nav holds keyboard focus. Without JS the nav simply stays.
  *
+ * The footer is the site's contact section: the floating nav's "Talk to us" scrolls
+ * to it (`#contact`), and there is no separate contact page.
+ *
  * Not from Figma: the copyright year is the current year (the design says 2024),
- * and the link targets. Instagram is the profile the studio's live site links to;
- * the YouTube channel is the one that published the studio's films.
+ * and the link targets. The links match the floating nav's: Projects and Services
+ * go to those homepage sections, About to its page. Instagram is the profile the
+ * studio's live site links to; the YouTube channel is the one that published the
+ * studio's films.
  */
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 const email = "hello@flyingturtlestudio.in";
@@ -50,15 +55,15 @@ const email = "hello@flyingturtlestudio.in";
 interface FooterLink {
   href: string;
   label: string;
-  /** The 5px dot of the design, after PROJECTS and ABOUT. */
+  /** The 5px dot of the design, after PROJECTS and SERVICES. */
   dot?: boolean;
   external?: boolean;
 }
 
 const links: FooterLink[] = [
-  { href: "/projects", label: "Projects", dot: true },
-  { href: "/about", label: "About", dot: true },
-  { href: "/contact", label: "Contact" },
+  { href: "/#work", label: "Projects", dot: true },
+  { href: "/#services", label: "Services", dot: true },
+  { href: "/about", label: "About" },
   { href: "https://www.instagram.com/flying_turtle_studio/", label: "Instagram", external: true },
   { href: "https://www.youtube.com/@flyingturtlestudio", label: "Youtube", external: true },
 ];
@@ -68,6 +73,7 @@ const big =
 ---
 
 <footer
+  id="contact"
   class="site-footer relative isolate flex min-h-svh flex-col bg-cream text-black lg:h-[min(78.15vw,100svh)] lg:min-h-[260px]"
 >
   <img

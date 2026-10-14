@@ -5,8 +5,13 @@
  *
  *   navigation  row · gap 6px · 32px from the bottom edge (20px on phones)
  *   links       glass capsule · padding 16px 26px · radius 120px
- *               Inter 400 · 13/14 · uppercase · 5 × 5 dot after PROJECTS and ABOUT
+ *               Inter 400 · 13/14 · uppercase · 5 × 5 dot after each link but the last
  *   Talk to us  prominent glass capsule: white-tinted, #000 label · padding 16px 32px
+ *
+ * Where they go: Projects and Services scroll to those homepage sections (from any
+ * other page they open the homepage there), About is its own page, and Talk to us
+ * scrolls down to the footer (`#contact`), which is on every page; there is no
+ * separate contact page. Lenis (see `SiteLayout`) makes the in-page scrolls smooth.
  *
  * The glass, as one `.glass` class on the finished shapes (never glass on glass):
  *   material    the browser's own `backdrop-filter`: a blur, then a brightness
@@ -33,9 +38,9 @@
  */
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 const links = [
-  { href: "/projects", label: "Projects", dot: true },
-  { href: "/about", label: "About", dot: true },
-  { href: "/contact", label: "Contact", dot: false },
+  { href: "/#work", label: "Projects", dot: true },
+  { href: "/#services", label: "Services", dot: true },
+  { href: "/about", label: "About", dot: false },
 ];
 ---
 
@@ -65,7 +70,7 @@ const links = [
 
   <a
     class="glass glass-prominent pointer-events-auto flex items-center justify-center self-stretch px-8 py-4 text-[13px] font-normal uppercase leading-[14px]"
-    href="/contact"
+    href="#contact"
   >
     Talk to us
   </a>
