@@ -8,9 +8,11 @@ import SiteFooter from "../components/SiteFooter.astro";
 interface Props {
   title: string;
   description: string;
+  /** Header lettering: "light" when the page opens on a photo or a dark section. */
+  headerTone?: "dark" | "light";
 }
 
-const { title, description } = Astro.props;
+const { title, description, headerTone } = Astro.props;
 ---
 
 <!doctype html>
@@ -28,9 +30,9 @@ const { title, description } = Astro.props;
     />
     <title>{title} · Flying Turtle Studio</title>
   </head>
-  <body class="relative min-h-screen">
-    <SiteHeader />
-    <main id="main">
+  <body class="relative flex min-h-screen flex-col">
+    <SiteHeader tone={headerTone} />
+    <main id="main" class="grow">
       <slot />
     </main>
     <SiteFooter />

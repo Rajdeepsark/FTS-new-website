@@ -1,0 +1,28 @@
+---
+/**
+ * Project page, second section: a label over one long paragraph. Built from a
+ * screenshot of the 1440-wide design (no Figma CSS); the sizes follow the hero's
+ * type, checked against the design's line breaks.
+ *
+ *   section    white · padding 64px · label 20px above the text
+ *   label      "[ Synopsis ]"  Inter 500 · 14/14 · uppercase · #0D0C0B at 50%
+ *   text       Inter 400 · 32/120% · -0.03em · #0D0C0B
+ *
+ * The text runs the full width at every size, between the 64px margins (the
+ * design's line breaks at 1440), and steps down in size on smaller screens.
+ */
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+---
+
+<section class="bg-white px-4 py-12 text-night sm:px-8 sm:py-16 lg:px-16" aria-label={label}>
+  <p class="text-[12px] font-medium uppercase leading-[14px] opacity-50 sm:text-[14px]">[ {label} ]</p>
+  <p
+    class="mt-4 text-[22px] leading-[130%] tracking-[-0.03em] sm:mt-5 sm:text-[28px] sm:leading-[125%] lg:text-[32px] lg:leading-[120%]"
+  >
+    <slot />
+  </p>
+</section>

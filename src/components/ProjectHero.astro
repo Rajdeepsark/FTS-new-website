@@ -1,0 +1,97 @@
+---
+/**
+ * Project page hero, from the Figma project page "Frame 6" (1440 × 900).
+ *
+ *   frame      the film's still, cover-fitted · padding 64px 64px 32px · the
+ *              facts panel sits on the bottom edge
+ *   container  #0D0C0B · 1px rgba(255,255,255,0.1) border · padding 32px ·
+ *              items spread edge to edge (space-between)
+ *   item       column · gap 10px
+ *     label    "[ Typologies ]"  Inter 500 · 14/14 · uppercase · #F2EBE3 at 50%
+ *     value    Inter 400 · 20/150% · -0.03em · #F2EBE3
+ *
+ * The frame is one screen tall. Below `lg` the panel is a two-by-two grid with
+ * smaller padding, and the still is shifted right so the actor and his phone
+ * stay in view when the sides are cropped.
+ *
+ * The design shows no title, so the page heading is for screen readers only.
+ *
+ * The floating nav would sit on the panel, so it steps aside while the panel is
+ * in the band the nav occupies and comes back once the page scrolls. The fade
+ * itself (the `--nav-fade` property and its transition) lives in SiteFooter,
+ * which does the same for its own bar.
+ */
+interface Fact {
+  label: string;
+  /** One entry per line, as broken in the design. */
+  lines: string[];
+}
+
+interface Props {
+  title: string;
+  image: { src: string; alt: string; width: number; height: number };
+  facts: Fact[];
+}
+
+const { title, image, facts } = Astro.props;
+---
+
+<section
+  class="relative isolate flex min-h-svh items-end px-4 pb-4 pt-32 sm:px-8 sm:pb-8 lg:px-16 lg:pt-16"
+  aria-labelledby="project-title"
+  data-nav-tone="light"
+>
+  <img
+    class="absolute inset-0 -z-10 size-full bg-night object-cover object-[64%_50%] lg:object-center"
+    src={image.src}
+    alt={image.alt}
+    width={image.width}
+    height={image.height}
+    fetchpriority="high"
+    decoding="async"
+  />
+
+  <h1 id="project-title" class="sr-only">{title}</h1>
+
+  <dl
+    class="grid w-full grid-cols-2 gap-x-6 gap-y-6 border border-white/10 bg-night p-5 text-cream sm:p-8 lg:flex lg:justify-between lg:gap-x-[95px]"
+    data-project-facts
+  >
+    {
+      facts.map(({ label, lines }) => (
+        <div class="flex flex-col items-start gap-2.5">
+          <dt class="text-[12px] font-medium uppercase leading-[14px] opacity-50 sm:text-[14px]">[ {label} ]</dt>
+          <dd class="text-[17px] leading-[150%] tracking-[-0.03em] sm:text-[20px]">
+            {lines.map((line, i) => (
+              <>
+                {i > 0 && <br />}
+                {line}
+              </>
+            ))}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<style is:global>
+  [data-floating-nav][data-over-project-facts]:not(:focus-within) {
+    visibility: hidden;
+    --nav-fade: 0;
+  }
+</style>
+
+<script>
+  const facts = document.querySelector<HTMLElement>("[data-project-facts]");
+  const nav = document.querySelector<HTMLElement>("[data-floating-nav]");
+
+  if (facts && nav && "IntersectionObserver" in window) {
+    new IntersectionObserver(
+      // Several crossings can arrive in one call, oldest first; the last is the current state.
+      (entries) => nav.toggleAttribute("data-over-project-facts", entries[entries.length - 1].isIntersecting),
+      // The bottom 14% of the viewport, the same band FloatingNav reads its tone from.
+      { rootMargin: "-86% 0px 0px 0px", threshold: 0 },
+    ).observe(facts);
+  }
+</script>

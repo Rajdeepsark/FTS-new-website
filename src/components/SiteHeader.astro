@@ -8,8 +8,19 @@
  * The time is the studio's local time (India, Asia/Kolkata). It is server-rendered
  * once and then kept current client-side, refreshed on every minute boundary; the
  * glyph's hands follow the same time.
+ *
+ * `tone` is for the page's first section: "dark" (the default) is ink lettering
+ * for light backdrops, "light" is cream lettering, with the logo artwork inverted,
+ * for pages that open on a photo or a dark section.
  */
 import Logo from "./Logo.astro";
+
+interface Props {
+  tone?: "dark" | "light";
+}
+
+const { tone = "dark" } = Astro.props;
+const light = tone === "light";
 
 const TIME_ZONE = "Asia/Kolkata";
 const now = new Date();
@@ -23,12 +34,19 @@ const initialTime = new Intl.DateTimeFormat("en-US", {
 
 <header class="absolute inset-x-0 top-0 z-40">
   <div class="mx-auto flex max-w-[1800px] items-center justify-between px-6 py-6 sm:px-8 sm:py-8 lg:px-10">
-    <a class="text-ink transition-opacity hover:opacity-70" href="/" aria-label="Flying Turtle Studio home">
+    <a
+      class:list={["transition-opacity hover:opacity-70", light ? "text-cream [&_img]:invert" : "text-ink"]}
+      href="/"
+      aria-label="Flying Turtle Studio home"
+    >
       <Logo />
     </a>
 
     <p
-      class="flex items-center gap-2.5 text-[13px] font-normal uppercase leading-[14px] text-ink"
+      class:list={[
+        "flex items-center gap-2.5 text-[13px] font-normal uppercase leading-[14px]",
+        light ? "text-cream" : "text-ink",
+      ]}
       title="Local time at the studio (India)"
       data-local-clock
       data-time-zone={TIME_ZONE}
@@ -36,7 +54,7 @@ const initialTime = new Intl.DateTimeFormat("en-US", {
       <span>IND</span>
       <svg class="size-3 shrink-0" viewBox="0 0 12 12" aria-hidden="true">
         <circle cx="6" cy="6" r="6" fill="currentColor" />
-        <g stroke="#ffffff" stroke-width="1.25" stroke-linecap="round" style="transform-origin: 6px 6px">
+        <g stroke={light ? "#0d0c0b" : "#ffffff"} stroke-width="1.25" stroke-linecap="round" style="transform-origin: 6px 6px">
           <line data-hand="hour" x1="6" y1="6" x2="6" y2="3.6" style="transform-origin: 6px 6px" />
           <line data-hand="minute" x1="6" y1="6" x2="6" y2="2.5" style="transform-origin: 6px 6px" />
         </g>

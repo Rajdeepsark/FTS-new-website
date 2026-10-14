@@ -1,0 +1,421 @@
+---
+/**
+ * Project page, third section: the making-of story, told in chapters, with a
+ * list of pointers beside it. Built from a screenshot of the 1440-wide design
+ * (no Figma CSS), measured off the pixels.
+ *
+ *   section    cream #F2EBE3 · padding 32px 64px · pointers 301px, gap 32px, then
+ *              the text column: 85% of the room right of the pointers, set
+ *              against the right margin, so the spare room falls between the two
+ *              (space-between; the user asked for full width, then for 0.85× of
+ *              that, pushed apart)
+ *   pointer    the current chapter: "■ [ 01 ]"  10px square, gap 8px ·
+ *                Inter 500 · 14/14 · uppercase · #0D0C0B
+ *              its title  Inter 400 · 20/150% · -0.03em · #0D0C0B, 10px below
+ *              the others: "[ The Film’s Concept ]"  Inter 400 · 13/14 · uppercase ·
+ *                #0D0C0B at 50% · 16px apart, 10px from the current one
+ *   text       Inter 400 · 16/150% · #000 · paragraphs and pictures 48px apart
+ *   picture    77.8% of the column (729 × 324 in the design), against its right edge
+ *
+ * The design labels the current pointer "[ STATUS ]", a placeholder; it shows the
+ * chapter's number here, like the "[ 01 ]" on the homepage project cards.
+ *
+ * Pinned (from `lg`, set up by the script): the section is one screen that stays
+ * put while the page scrolls past 100svh (`--step`) per chapter, and only the
+ * current chapter shows. Crossing into the next step fades the old chapter out,
+ * then fades the new one in with its paragraphs and picture rising into place one
+ * after another; the pointers follow, the current one opening up as the last one
+ * folds back into a label. A pointer scrolls to the start of its step. The bottom
+ * 112px stay clear for the floating nav. Each chapter fills the screen down to
+ * there: its picture takes whatever height the text leaves (cropping the frame
+ * taller), and where that is less than the picture's own 729:324 shape it narrows
+ * to keep that shape. If the text leaves under 120px, the section stays unpinned.
+ *
+ * Unpinned (phones, short windows, no JS): the chapters run down the page, each
+ * opening with the current-pointer heading (from `lg` that heading is for screen
+ * readers only and the pointers stick beside the text instead), and each
+ * paragraph and picture fades and rises in as it scrolls into view. Without JS
+ * nothing is hidden. With reduced motion nothing fades or moves; chapters swap at
+ * once.
+ */
+import type { Chapter } from "../data/scrollThatStoleTime";
+
+interface Props {
+  chapters: Chapter[];
+}
+
+const { chapters } = Astro.props;
+const number = (i: number) => String(i + 1).padStart(2, "0");
+---
+
+<section
+  class="chapters bg-cream px-4 pb-24 pt-12 text-night sm:px-8 lg:px-16 lg:pb-[120px] lg:pt-8"
+  style={`--count: ${chapters.length}`}
+  aria-label="Behind the film"
+  data-chapters
+>
+  <div class="stage lg:grid lg:grid-cols-[301px_minmax(0,1fr)] lg:items-start lg:gap-x-8">
+    <nav class="pointers sticky top-8 hidden lg:block" aria-label="Chapters">
+      <ol class="flex flex-col gap-4">
+        {
+          chapters.map(({ id, title }, i) => (
+            <li class="pointer" data-pointer={id} data-active={i === 0 ? "" : undefined}>
+              <a class="group grid" href={`#${id}`} aria-label={title} aria-current={i === 0 ? "true" : undefined}>
+                <span class="row collapsed" aria-hidden="true">
+                  <span class="block text-[13px] uppercase leading-[14px] opacity-50 transition-opacity group-hover:opacity-80">
+                    [ {title} ]
+                  </span>
+                </span>
+                <span class="row expanded" aria-hidden="true">
+                  <span class="flex flex-col items-start gap-2.5">
+                    <span class="flex items-center gap-2 text-[14px] font-medium uppercase leading-[14px]">
+                      <span class="size-2.5 bg-current" />[ {number(i)} ]
+                    </span>
+                    <span class="text-[20px] leading-[150%] tracking-[-0.03em]">{title}</span>
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <div class="stack flex flex-col gap-24 lg:w-[85%] lg:justify-self-end lg:gap-[120px]" data-stack>
+      {
+        chapters.map(({ id, title, blocks }, i) => (
+          <article
+            id={id}
+            class="flex scroll-mt-8 flex-col gap-8 lg:gap-12"
+            aria-labelledby={`${id}-title`}
+            data-chapter
+            data-current={i === 0 ? "" : undefined}
+          >
+            <header class="flex flex-col items-start gap-2.5 lg:sr-only" data-fade>
+              <p class="flex items-center gap-2 text-[14px] font-medium uppercase leading-[14px]">
+                <span class="size-2.5 bg-current" aria-hidden="true" />[ {number(i)} ]
+              </p>
+              <h2 id={`${id}-title`} class="text-[20px] leading-[150%] tracking-[-0.03em]">
+                {title}
+              </h2>
+            </header>
+
+            {blocks.map((block, b) =>
+              typeof block === "string" ? (
+                <p class="text-[16px] leading-[150%] text-black" style={`--i: ${b}`} data-fade>
+                  {block}
+                </p>
+              ) : (
+                <img
+                  class="aspect-[729/324] w-full bg-night/10 object-cover lg:ml-auto lg:w-[77.8%]"
+                  style={`--i: ${b}`}
+                  src={block.src}
+                  alt={block.alt}
+                  width={block.width}
+                  height={block.height}
+                  loading="lazy"
+                  decoding="async"
+                  data-fade
+                />
+              ),
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .chapters {
+    --step: 100svh;
+  }
+
+  /* ---- Pointers --------------------------------------------------------------- */
+
+  /* A pointer is two rows, the label and the open state; the one not showing is
+     folded to no height, so opening one slides the list below it down. */
+  .pointer {
+    transition: margin 0.5s ease;
+  }
+
+  .pointer a {
+    grid-template-rows: 1fr 0fr;
+    transition: grid-template-rows 0.5s ease;
+  }
+
+  /* The row on its way out fades quickly; the one coming in waits for it, so the
+     two never show at once. */
+  .row {
+    min-height: 0;
+    overflow: hidden;
+    transition: opacity 0.2s ease;
+  }
+
+  .expanded {
+    opacity: 0;
+  }
+
+  .pointer:not([data-active]) .collapsed,
+  .pointer[data-active] .expanded {
+    transition: opacity 0.35s ease 0.2s;
+  }
+
+  .pointer[data-active] a {
+    grid-template-rows: 0fr 1fr;
+  }
+
+  .pointer[data-active] .collapsed {
+    opacity: 0;
+  }
+
+  .pointer[data-active] .expanded {
+    opacity: 1;
+  }
+
+  /* 10px, not the list's 16px, around the open pointer. */
+  .pointer[data-active] {
+    margin-block: -6px;
+  }
+
+  .pointer[data-active]:first-child {
+    margin-top: 0;
+  }
+
+  /* ---- Unpinned: fade-in on scroll, armed by the script ------------------------- */
+  [data-fade-ready] [data-fade] {
+    opacity: 0;
+    translate: 0 32px;
+    transition:
+      opacity 0.9s ease,
+      translate 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  [data-fade-ready] [data-fade][data-in] {
+    opacity: 1;
+    translate: none;
+  }
+
+  /* ---- Pinned: one screen, one chapter at a time ------------------------------- */
+  .chapters[data-pinned] {
+    height: calc(100svh + var(--count) * var(--step));
+    padding: 0;
+  }
+
+  /* The row is held to the screen, so a chapter too tall for it overflows (and the
+     script can tell) rather than stretching the stage. */
+  [data-pinned] .stage {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    padding: 32px 64px 112px;
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  [data-pinned] .pointers {
+    position: static;
+  }
+
+  /* Every chapter sits in the same place; only the current one shows. */
+  [data-pinned] .stack {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    height: 100%;
+  }
+
+  [data-pinned] [data-chapter] {
+    grid-area: 1 / 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  [data-pinned] [data-chapter][data-current] {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.6s ease 0.25s;
+  }
+
+  /* The incoming chapter's paragraphs and picture rise in one after another. */
+  [data-pinned] [data-fade] {
+    translate: 0 28px;
+    transition: translate 0s linear 0.3s;
+  }
+
+  [data-pinned] [data-current] [data-fade] {
+    translate: none;
+    transition: translate 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) calc(0.25s + var(--i, 0) * 0.1s);
+  }
+
+  /* The picture fills the height the text leaves; the script narrows it when that
+     height is less than its own shape needs. */
+  [data-pinned] img[data-fade] {
+    flex: 1 1 0;
+    min-height: 0;
+    aspect-ratio: auto;
+    width: min(77.8%, var(--fit-width, 77.8%));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pointer,
+    .pointer a,
+    .row,
+    .pointer:not([data-active]) .collapsed,
+    .pointer[data-active] .expanded,
+    [data-pinned] [data-chapter],
+    [data-pinned] [data-chapter][data-current],
+    [data-pinned] [data-fade],
+    [data-pinned] [data-current] [data-fade] {
+      transition: none;
+    }
+
+    [data-pinned] [data-fade] {
+      translate: none;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>("[data-chapters]");
+  const stack = root?.querySelector<HTMLElement>("[data-stack]");
+
+  if (root && stack) {
+    const chapters = [...root.querySelectorAll<HTMLElement>("[data-chapter]")];
+    const pointers = [...root.querySelectorAll<HTMLElement>("[data-pointer]")];
+    const fades = [...root.querySelectorAll<HTMLElement>("[data-fade]")];
+    const wide = window.matchMedia("(min-width: 64rem)");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const PICTURE_RATIO = 729 / 324;
+    const MIN_PICTURE_HEIGHT = 120; // px; below this the section stays unpinned
+
+    let pinned = false;
+    let current = 0;
+
+    const setCurrent = (index: number) => {
+      current = index;
+      chapters.forEach((chapter, i) => chapter.toggleAttribute("data-current", i === index));
+      pointers.forEach((pointer, i) => {
+        pointer.toggleAttribute("data-active", i === index);
+        const link = pointer.querySelector("a");
+        if (i === index) link?.setAttribute("aria-current", "true");
+        else link?.removeAttribute("aria-current");
+      });
+    };
+
+    // Scroll per chapter, in px: the section's extra height shared out.
+    const step = () => (root.offsetHeight - window.innerHeight) / chapters.length;
+
+    const followScroll = () => {
+      if (!pinned) return;
+      const scrolled = -root.getBoundingClientRect().top;
+      const index = Math.min(chapters.length - 1, Math.max(0, Math.floor(scrolled / step())));
+      if (index !== current) setCurrent(index);
+    };
+
+    // ---- Unpinned: fade-in, and the pointer follows the line 40% down ----------
+    const fader =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(
+            (entries) => {
+              for (const { target, isIntersecting, boundingClientRect } of entries) {
+                if (isIntersecting) target.setAttribute("data-in", "");
+                // Gone below the screen (scrolling back up): fade in again next time.
+                else if (boundingClientRect.top > 0) target.removeAttribute("data-in");
+              }
+            },
+            // Starts once the top of the block is 12% up from the bottom of the screen.
+            { rootMargin: "0px 0px -12% 0px" },
+          )
+        : null;
+    fades.forEach((el) => fader?.observe(el));
+
+    const reader =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(
+            (entries) => {
+              if (pinned) return;
+              const crossing = entries.filter((entry) => entry.isIntersecting);
+              if (crossing.length) setCurrent(chapters.indexOf(crossing[crossing.length - 1].target as HTMLElement));
+            },
+            // A thin band 40% down the screen; between chapters the last one stays current.
+            { rootMargin: "-40% 0px -59% 0px" },
+          )
+        : null;
+    chapters.forEach((chapter) => reader?.observe(chapter));
+
+    // ---- Pinned or not ------------------------------------------------------------
+    // Pins the section when the screen is wide enough and every chapter fits it.
+    // Pinned, each picture already fills the height its text leaves (see the style
+    // block); here a picture left shorter than its own shape is narrowed to keep it.
+    const layout = () => {
+      chapters.forEach((chapter) => chapter.style.removeProperty("--fit-width"));
+      let fits = wide.matches;
+
+      if (fits) {
+        root.setAttribute("data-pinned", "");
+        for (const chapter of chapters) {
+          const picture = chapter.querySelector("img");
+          if (!picture) {
+            if (chapter.scrollHeight > chapter.clientHeight) fits = false;
+            continue;
+          }
+          const height = picture.offsetHeight;
+          if (height < MIN_PICTURE_HEIGHT) fits = false;
+          else if (height < picture.offsetWidth / PICTURE_RATIO) {
+            chapter.style.setProperty("--fit-width", `${Math.floor(height * PICTURE_RATIO)}px`);
+          }
+          if (!fits) break;
+        }
+      }
+
+      if (fits !== pinned) {
+        pinned = fits;
+        if (!pinned) {
+          // Blocks already on screen show at once; the rest fade in as they arrive.
+          fades.forEach((el) => {
+            if (el.getBoundingClientRect().top < window.innerHeight) el.setAttribute("data-in", "");
+          });
+        }
+      }
+      if (!pinned) {
+        root.removeAttribute("data-pinned");
+        chapters.forEach((chapter) => chapter.style.removeProperty("--fit-width"));
+      }
+      root.toggleAttribute("data-fade-ready", !pinned && !!fader && !reduced.matches);
+      followScroll();
+    };
+
+    // A pointer scrolls to the start of its chapter's step while pinned (Lenis
+    // handles the jump to the chapter itself when unpinned).
+    pointers.forEach((pointer, i) =>
+      pointer.querySelector("a")?.addEventListener("click", (event) => {
+        if (!pinned) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const top = root.getBoundingClientRect().top + window.scrollY + i * step() + 2;
+        window.scrollTo({ top, behavior: reduced.matches ? "auto" : "smooth" });
+      }),
+    );
+
+    // At most one run per frame for each.
+    const throttled = (task: () => void) => {
+      let frame = 0;
+      return () => {
+        if (!frame) frame = requestAnimationFrame(() => ((frame = 0), task()));
+      };
+    };
+
+    layout();
+    document.fonts?.ready.then(layout);
+    window.addEventListener("resize", throttled(layout));
+    window.addEventListener("scroll", throttled(followScroll), { passive: true });
+
+    // Arriving with a chapter in the address bar: go to its step.
+    const linked = chapters.findIndex((chapter) => `#${chapter.id}` === window.location.hash);
+    if (pinned && linked > 0) {
+      requestAnimationFrame(() =>
+        window.scrollTo({ top: root.getBoundingClientRect().top + window.scrollY + linked * step() + 2 }),
+      );
+    }
+  }
+</script>

@@ -1,0 +1,46 @@
+---
+import SiteLayout from "../../layouts/SiteLayout.astro";
+import ProjectHero from "../../components/ProjectHero.astro";
+import ProjectSynopsis from "../../components/ProjectSynopsis.astro";
+import ProjectChapters from "../../components/ProjectChapters.astro";
+import { chapters } from "../../data/scrollThatStoleTime";
+
+// The design's facts panel holds template text (a Berlin museum, a Norwegian
+// award); these values come from the studio's own copy and the release poster.
+const facts = [
+  { label: "Typologies", lines: ["Short Film,", "Essay Film"] },
+  { label: "Status", lines: ["Completed"] },
+  { label: "Location", lines: ["Guwahati, Assam,", "India"] },
+  { label: "Awards", lines: ["Best Essay Film,", "FICIMAD 2026"] },
+];
+---
+
+<SiteLayout
+  title="The Scroll That Stole Time"
+  description="A debut short film shot in Guwahati with zero budget, about how social media quietly steals our lives away."
+  headerTone="light"
+>
+  <ProjectHero
+    title="The Scroll That Stole Time"
+    image={{
+      // Repo root "TSTST POSTER 04 1.png" (the poster's still without lettering,
+      // 1312 × 697), upscaled to 2400 wide with a light sharpen.
+      src: "/projects/the-scroll-that-stole-time/hero.jpg",
+      alt: "Phillips Neog at dusk by the river, his face lit by his phone",
+      width: 2400,
+      height: 1275,
+    }}
+    facts={facts}
+  />
+
+  <ProjectSynopsis label="Synopsis">
+    A debut short film shot entirely with zero budget, The Scroll that Stole Time explores the impact of technology on
+    our lives through the story of Aarav, a man lost in the world of digital distractions. Set in Guwahati, Assam, this
+    guerrilla-style project reflects on the isolating effects of social media addiction. With just a Panasonic Lumix
+    S5iiX and a DJI Mini 4 Pro drone, the film was brought to life with improvisation, natural light, and a touch of
+    Wong Kar-wai-inspired cinematography. This introspective film asks, “Are we controlling our phones, or are they
+    controlling us?”
+  </ProjectSynopsis>
+
+  <ProjectChapters chapters={chapters} />
+</SiteLayout>
