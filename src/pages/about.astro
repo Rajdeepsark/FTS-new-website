@@ -1,31 +1,303 @@
 ---
 /**
- * About page: a placeholder while the real page is written. It borrows the homepage
- * statement's type (label beside a left-aligned heading, body under it) and points
- * back to the homepage's "( We are )" section in the meantime.
+ * About page. The copy is the studio's own, from the About page of its live site
+ * (flyingturtlestudio.in/about/), and so are the three photos (portrait, award
+ * poster, motorcycle), saved into `public/about/`. There is no Figma frame for this
+ * page yet, so the layout borrows the site's type and pieces:
+ *
+ *   intro        cream · "[ About ]" label over a display heading, then a lead
+ *                statement beside the body (the project synopsis's 32/120% type
+ *                and the homepage statement's 20/150% body)
+ *   founder      white · the portrait (sticky from `lg`) beside "In short" and
+ *                "In depth", then "Training & career" in the project hero's dark
+ *                facts panel
+ *   recognition  night · awards by year beside the release poster (sticky from `lg`)
+ *   press        night · three outbound links, label over headline, ↗ arrow
+ *   road         the motorcycle photo full width at its own 3:2, the heading over
+ *                its sky from `lg` (night type: 6.8:1 on that blue, white would be
+ *                2.9:1), and below it the closing line and three links on cream,
+ *                set to the two edges like the footer's row, which follows on the
+ *                same cream
+ *
+ * Labels are "[ … ]" as on the project page and the live site. Mentions of The
+ * Scroll That Stole Time link to its case study.
  */
 import SiteLayout from "../layouts/SiteLayout.astro";
+import { awards, career, press } from "../data/about";
+
+const label = "text-[12px] font-medium uppercase leading-[14px] opacity-50 sm:text-[14px]";
+const statement =
+  "text-[22px] leading-[130%] tracking-[-0.03em] sm:text-[28px] sm:leading-[125%] lg:text-[32px] lg:leading-[120%]";
+const body = "text-[17px] leading-[150%] tracking-[-0.02em] sm:text-[20px]";
+const display = "font-normal leading-[100%] tracking-[-0.04em]";
+const serif = "font-serif text-[1.08em] leading-none";
+const inlineLink = "underline decoration-1 underline-offset-4 transition-opacity hover:opacity-70";
+const scrollHref = "/projects/the-scroll-that-stole-time";
+
+const nextLinks = [
+  { href: "/#work", label: "Watch the films" },
+  { href: "/#services", label: "What the studio does" },
+  { href: "#contact", label: "Get in touch" },
+];
 ---
 
-<SiteLayout title="About" description="About Flying Turtle Studio, a creative production house. This page is being written.">
-  <section class="flex min-h-svh items-center bg-cream px-4 pb-32 pt-32 sm:px-8" aria-labelledby="about-page-heading">
-    <div class="mx-auto grid w-full max-w-[506px] gap-y-6 md:grid-cols-[90px_1fr]">
-      <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px] text-night md:mt-4 md:whitespace-nowrap">
-        ( About )
+<SiteLayout
+  title="About"
+  description="Flying Turtle Studio is an independent film and video production studio in Guwahati, Assam, founded by filmmaker Kaushik Sharma in April 2022."
+>
+  <section
+    class="bg-cream px-4 pb-20 pt-32 text-night sm:px-8 sm:pb-24 sm:pt-40 lg:px-16 lg:pb-[120px] lg:pt-[184px]"
+    aria-labelledby="about-heading"
+  >
+    <p class={label}>[ About ]</p>
+    <h1 id="about-heading" class:list={["mt-4 text-[56px] sm:mt-5 sm:text-[88px] lg:text-[128px]", display]}>
+      A turtle<br />
+      <span class={serif}>that flies</span>
+    </h1>
+
+    <div class="mt-12 grid gap-8 sm:mt-16 lg:mt-24 lg:grid-cols-2 lg:gap-16">
+      <p class={statement}>
+        Flying Turtle Studio is an independent film and video production studio based in Guwahati, Assam, founded by
+        Kaushik Sharma in April 2022.
       </p>
-      <h1 id="about-page-heading" class="text-[36px] font-normal leading-[120%] tracking-[-0.03em] text-night sm:text-[48px]">
-        <span class="font-serif">Our story</span><br />
-        is still being<br />
-        <span class="font-serif">written</span>
-      </h1>
-      <div class="space-y-7 text-[17px] leading-[150%] tracking-[-0.02em] text-night sm:text-[20px] md:col-start-2 md:mt-2">
-        <p>This page is on its way. Until it is ready, the homepage tells you who we are and what we make.</p>
+      <div class:list={["space-y-6", body]}>
         <p>
-          <a class="underline decoration-1 underline-offset-4 transition-opacity hover:opacity-70" href="/#about">
-            Read about the studio
-          </a>
+          The name comes from an unlikely image, a turtle that flies, and that’s the whole philosophy: stay grounded,
+          steady, and patient like a turtle, but let the creative ambition soar without limits.
+        </p>
+        <p>
+          The studio works across documentary, essay films, branded and corporate content, drone cinematography, and
+          short narrative work, with Kaushik personally handling most of the process end to end, writing, directing,
+          shooting, and editing, rather than outsourcing the vision to a large crew.
+        </p>
+        <p>
+          This hands-on, do-it-yourself approach was put to the test with the studio’s debut short film,
+          <a class={inlineLink} href={scrollHref}>The Scroll That Stole Time</a>, made on a zero budget with a skeleton
+          cast and no formal crew, which went on to win Best Essay Film at FICIMAD 2026 in Madrid. Proof that
+          resourcefulness and a real point of view can travel further than a big budget.
+        </p>
+        <p class="pt-4 font-serif text-[28px] leading-[120%] tracking-normal sm:text-[32px]">
+          Grounded in Story. Free in Imagination.
         </p>
       </div>
+    </div>
+  </section>
+
+  <section
+    class="bg-white px-4 py-16 text-night sm:px-8 sm:py-24 lg:px-16 lg:py-[120px]"
+    aria-labelledby="founder-heading"
+  >
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+      <img
+        class="aspect-[4/5] w-full bg-cream object-cover max-lg:max-w-[520px] lg:sticky lg:top-16 lg:self-start"
+        src="/about/kaushik-sharma.jpg"
+        alt="Portrait of filmmaker Kaushik Sharma in a tan jacket, seated against a plain white wall, looking towards the camera."
+        width="827"
+        height="1034"
+        loading="lazy"
+        decoding="async"
+      />
+
+      <!-- From `lg` the three blocks spread over the row's height (space-between), so
+           the heading sits level with the portrait's top and the last line with its
+           bottom; the gaps never close below 64px. Where the text runs longer than
+           the portrait, the gaps stay at 64px and the portrait is the one pinned. -->
+      <div class="flex flex-col gap-12 lg:justify-between lg:gap-16">
+        <h2 id="founder-heading" class:list={["text-[48px] sm:text-[72px] lg:text-[96px]", display]}>
+          Kaushik<br />
+          <span class={serif}>Sharma</span>
+        </h2>
+
+        <div>
+          <p class={label}>[ In short ]</p>
+          <p class:list={["mt-4 sm:mt-5", statement]}>
+            Kaushik Sharma is a Guwahati-based filmmaker who believes small stories, told honestly, travel the farthest. He
+            founded Flying Turtle Studio in 2022 to make documentaries and essay films his own way, with a camera, an idea
+            and whatever he can carry. His debut short won Best Essay Film at FICIMAD 2026 in Madrid.
+          </p>
+        </div>
+
+        <div>
+          <p class={label}>[ In depth ]</p>
+          <p class:list={["mt-4 sm:mt-5", body]}>
+            Kaushik Sharma grew up wanting to tell stories that actually mean something, and spent over a decade chasing
+            that across two countries before he trusted himself enough to do it his own way. He trained at Whistling Woods
+            International in Mumbai, studied Media Arts at Wintec in New Zealand, and along the way edited for Doordarshan,
+            Mukta Arts and Māori Television, picking up a feel for pace, light and people wherever he worked. In 2022 he
+            came home to Guwahati and started Flying Turtle Studio, built on a simple belief: stay grounded like a turtle,
+            but let the ideas fly. He writes, shoots, directs, edits and colour grades most of his own work, because he
+            would rather do one thing fully than five things halfway. That instinct paid off with
+            <a class={inlineLink} href={scrollHref}>The Scroll That Stole Time</a>, a zero-budget debut short that went
+            on to win Best Essay Film at FICIMAD 2026 in Madrid. Outside of work, he is usually somewhere in Northeast
+            India on a motorcycle, looking for the next story.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-16 lg:mt-[120px]">
+      <h3 class="text-[20px] leading-[150%] tracking-[-0.03em]">Training &amp; career</h3>
+      <dl
+        class="mt-4 grid gap-6 border border-white/10 bg-night p-5 text-cream sm:grid-cols-3 sm:gap-x-8 sm:p-8 lg:gap-x-16"
+      >
+        {
+          career.map(({ label: name, lines, note }) => (
+            <div class="flex flex-col items-start gap-2.5">
+              <dt class={label}>[ {name} ]</dt>
+              <dd class="text-[17px] leading-[150%] tracking-[-0.03em] sm:text-[20px]">
+                {lines.map((line) => (
+                  <span class="block">{line}</span>
+                ))}
+                {note && <span class="mt-2 block text-[15px] opacity-70 sm:text-[16px]">{note}</span>}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section
+    class="bg-night px-4 py-16 text-cream sm:px-8 sm:py-24 lg:px-16 lg:py-[120px]"
+    aria-labelledby="awards-heading"
+    data-nav-tone="light"
+  >
+    <p class={label}>[ Recognition ]</p>
+    <h2 id="awards-heading" class="mt-3 text-[36px] font-normal leading-[120%] tracking-[-0.03em] sm:text-[48px]">
+      Awards &amp; <span class={serif}>Recognition</span>
+    </h2>
+
+    <div class="mt-12 grid gap-12 lg:mt-16 lg:grid-cols-2 lg:gap-16">
+      <img
+        class="aspect-video w-full border border-white/10 bg-black object-cover lg:sticky lg:top-16 lg:order-2 lg:self-start"
+        src="/about/scroll-award-poster.jpg"
+        alt="Award poster for The Scroll That Stole Time showing the FICIMAD 2026 Best Essay Film laurel and the FICSAMAS official selection laurel."
+        width="1280"
+        height="720"
+        loading="lazy"
+        decoding="async"
+      />
+
+      <ol class="border-b border-white/10">
+        {
+          awards.map(({ year, title, from, forScroll, note }) => (
+            <li class="grid gap-3 border-t border-white/10 py-8 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-6">
+              <p class:list={["sm:pt-[7px]", label]}>{year}</p>
+              <div>
+                <h3 class="text-[20px] leading-[150%] tracking-[-0.03em] sm:text-[24px] sm:leading-[140%]">{title}</h3>
+                <p class="mt-2 text-[16px] leading-[150%] opacity-70">
+                  {from}
+                  {forScroll && (
+                    <>
+                      {" "}
+                      For <a class={inlineLink} href={scrollHref}>The Scroll That Stole Time</a>.
+                    </>
+                  )}
+                </p>
+                {note && <p class="mt-4 text-[16px] leading-[150%] opacity-70">{note}</p>}
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section
+    class="bg-night px-4 pb-16 text-cream sm:px-8 sm:pb-24 lg:px-16 lg:pb-[120px]"
+    aria-labelledby="press-heading"
+    data-nav-tone="light"
+  >
+    <div class="grid gap-8 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <p class={label}>[ Press ]</p>
+        <h2 id="press-heading" class="mt-3 text-[36px] font-normal leading-[120%] tracking-[-0.03em] sm:text-[48px]">
+          In the <span class={serif}>news</span>
+        </h2>
+      </div>
+
+      <ul class="border-b border-white/10">
+        {
+          press.map(({ outlet, headline, href }) => (
+            <li class="border-t border-white/10">
+              <a class="group flex items-start justify-between gap-6 py-6 sm:py-8" href={href} target="_blank" rel="noopener noreferrer">
+                <span class="flex flex-col gap-3">
+                  <span class={label}>{outlet}</span>
+                  <span class="text-[20px] leading-[140%] tracking-[-0.03em] transition-opacity group-hover:opacity-70 sm:text-[24px]">
+                    {headline}
+                  </span>
+                </span>
+                <svg
+                  class="mt-5 size-8 shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none sm:mt-6"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6z" />
+                </svg>
+                <span class="sr-only">(opens in a new tab)</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="bg-cream text-night" aria-labelledby="road-heading">
+    <div class="relative">
+      <img
+        class="aspect-[3/2] w-full bg-[#5fa6d8] object-cover"
+        src="/about/on-the-road.jpg"
+        alt="Kaushik Sharma’s orange and white KTM 390 Adventure parked on a dirt track beside a bamboo fence and banana plants under a clear blue Assam sky."
+        width="1600"
+        height="1067"
+        loading="lazy"
+        decoding="async"
+        data-nav-tone="light"
+      />
+      <!-- From `lg` the heading sits in the band of open sky across the photo's top
+           fifth; it is sized and placed in vw so it keeps to that band at any width. -->
+      <h2
+        id="road-heading"
+        class:list={[
+          "px-4 pt-12 text-[48px] sm:px-8 sm:pt-16 sm:text-[72px] lg:absolute lg:left-16 lg:top-[5%] lg:p-0 lg:text-[5vw]",
+          display,
+        ]}
+      >
+        Somewhere<br />
+        <span class={serif}>on the road</span>
+      </h2>
+    </div>
+
+    <!-- Laid out like the footer's row under it: the line on the left at the
+         footer's measure, the links pushed to the right edge. -->
+    <div
+      class="flex flex-col gap-10 px-4 pb-24 pt-6 sm:px-8 sm:pt-8 lg:flex-row lg:items-start lg:justify-between lg:gap-16 lg:px-16 lg:pb-[120px] lg:pt-16"
+    >
+      <p class:list={["lg:max-w-[21.85em]", statement]}>
+        Outside of work, he is usually somewhere in Northeast India on a motorcycle, looking for the next story.
+      </p>
+
+      <ul class="flex shrink-0 flex-col items-start gap-4">
+        {
+          nextLinks.map(({ href, label: text }) => (
+            <li>
+              <a class:list={["group inline-flex items-start", statement]} href={href}>
+                <span class="underline underline-offset-[0.19em] [text-decoration-thickness:0.07em]">{text}</span>
+                <svg
+                  class="size-[1.2em] shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6z" />
+                </svg>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
     </div>
   </section>
 </SiteLayout>
