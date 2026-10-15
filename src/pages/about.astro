@@ -5,12 +5,13 @@
  * poster, motorcycle), saved into `public/about/`. There is no Figma frame for this
  * page yet, so the layout borrows the site's type and pieces:
  *
- *   intro        cream · "[ About ]" label over a display heading, then a lead
+ *   intro        cream · "[ About ]" label over the heading, then a lead
  *                statement beside the body (the project synopsis's 32/120% type
  *                and the homepage statement's 20/150% body)
- *   founder      white · the portrait (sticky from `lg`) beside "In short" and
- *                "In depth", then "Training & career" in the project hero's dark
- *                facts panel
+ *   founder      white · the square portrait in a third of the width (sticky from
+ *                `lg`, and never taller than the screen above the floating nav)
+ *                beside "In short" and "In depth", then "Training & career" in a light
+ *                version of the project hero's facts panel (cream, night type)
  *   recognition  night · awards by year beside the release poster (sticky from `lg`)
  *   press        night · three outbound links, label over headline, ↗ arrow
  *   road         the motorcycle photo full width at its own 3:2, the heading over
@@ -19,8 +20,9 @@
  *                set to the two edges like the footer's row, which follows on the
  *                same cream
  *
- * Labels are "[ … ]" as on the project page and the live site. Mentions of The
- * Scroll That Stole Time link to its case study.
+ * Every heading is the homepage's: 48/120% · -0.03em (36 on phones), with the serif
+ * run at 1.08em. Labels are "[ … ]" as on the project page and the live site.
+ * Mentions of The Scroll That Stole Time link to its case study.
  */
 import SiteLayout from "../layouts/SiteLayout.astro";
 import { awards, career, press } from "../data/about";
@@ -29,7 +31,7 @@ const label = "text-[12px] font-medium uppercase leading-[14px] opacity-50 sm:te
 const statement =
   "text-[22px] leading-[130%] tracking-[-0.03em] sm:text-[28px] sm:leading-[125%] lg:text-[32px] lg:leading-[120%]";
 const body = "text-[17px] leading-[150%] tracking-[-0.02em] sm:text-[20px]";
-const display = "font-normal leading-[100%] tracking-[-0.04em]";
+const heading = "text-[36px] font-normal leading-[120%] tracking-[-0.03em] sm:text-[48px]";
 const serif = "font-serif text-[1.08em] leading-none";
 const inlineLink = "underline decoration-1 underline-offset-4 transition-opacity hover:opacity-70";
 const scrollHref = "/projects/the-scroll-that-stole-time";
@@ -50,7 +52,7 @@ const nextLinks = [
     aria-labelledby="about-heading"
   >
     <p class={label}>[ About ]</p>
-    <h1 id="about-heading" class:list={["mt-4 text-[56px] sm:mt-5 sm:text-[88px] lg:text-[128px]", display]}>
+    <h1 id="about-heading" class:list={["mt-3", heading]}>
       A turtle<br />
       <span class={serif}>that flies</span>
     </h1>
@@ -87,12 +89,14 @@ const nextLinks = [
     class="bg-white px-4 py-16 text-night sm:px-8 sm:py-24 lg:px-16 lg:py-[120px]"
     aria-labelledby="founder-heading"
   >
-    <div class="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-16">
+      <!-- The whole square photo, 1034px (the largest the live site has). From `lg`
+           it fits between its 64px sticky offset and the floating nav's 112px band. -->
       <img
-        class="aspect-[4/5] w-full bg-cream object-cover max-lg:max-w-[520px] lg:sticky lg:top-16 lg:self-start"
+        class="aspect-square w-full bg-cream object-cover max-lg:max-w-[420px] lg:sticky lg:top-16 lg:max-w-[calc(100svh-11rem)] lg:self-start"
         src="/about/kaushik-sharma.jpg"
         alt="Portrait of filmmaker Kaushik Sharma in a tan jacket, seated against a plain white wall, looking towards the camera."
-        width="827"
+        width="1034"
         height="1034"
         loading="lazy"
         decoding="async"
@@ -103,7 +107,7 @@ const nextLinks = [
            bottom; the gaps never close below 64px. Where the text runs longer than
            the portrait, the gaps stay at 64px and the portrait is the one pinned. -->
       <div class="flex flex-col gap-12 lg:justify-between lg:gap-16">
-        <h2 id="founder-heading" class:list={["text-[48px] sm:text-[72px] lg:text-[96px]", display]}>
+        <h2 id="founder-heading" class={heading}>
           Kaushik<br />
           <span class={serif}>Sharma</span>
         </h2>
@@ -138,7 +142,7 @@ const nextLinks = [
     <div class="mt-16 lg:mt-[120px]">
       <h3 class="text-[20px] leading-[150%] tracking-[-0.03em]">Training &amp; career</h3>
       <dl
-        class="mt-4 grid gap-6 border border-white/10 bg-night p-5 text-cream sm:grid-cols-3 sm:gap-x-8 sm:p-8 lg:gap-x-16"
+        class="mt-4 grid gap-6 border border-night/10 bg-cream p-5 text-night sm:grid-cols-3 sm:gap-x-8 sm:p-8 lg:gap-x-16"
       >
         {
           career.map(({ label: name, lines, note }) => (
@@ -163,7 +167,7 @@ const nextLinks = [
     data-nav-tone="light"
   >
     <p class={label}>[ Recognition ]</p>
-    <h2 id="awards-heading" class="mt-3 text-[36px] font-normal leading-[120%] tracking-[-0.03em] sm:text-[48px]">
+    <h2 id="awards-heading" class:list={["mt-3", heading]}>
       Awards &amp; <span class={serif}>Recognition</span>
     </h2>
 
@@ -211,7 +215,7 @@ const nextLinks = [
     <div class="grid gap-8 lg:grid-cols-2 lg:gap-16">
       <div>
         <p class={label}>[ Press ]</p>
-        <h2 id="press-heading" class="mt-3 text-[36px] font-normal leading-[120%] tracking-[-0.03em] sm:text-[48px]">
+        <h2 id="press-heading" class:list={["mt-3", heading]}>
           In the <span class={serif}>news</span>
         </h2>
       </div>
@@ -256,14 +260,11 @@ const nextLinks = [
         decoding="async"
         data-nav-tone="light"
       />
-      <!-- From `lg` the heading sits in the band of open sky across the photo's top
-           fifth; it is sized and placed in vw so it keeps to that band at any width. -->
+      <!-- From `lg` the heading sits in the open sky at the photo's top left, inside
+           the page's 64px margins; the sky runs a quarter of the way down there. -->
       <h2
         id="road-heading"
-        class:list={[
-          "px-4 pt-12 text-[48px] sm:px-8 sm:pt-16 sm:text-[72px] lg:absolute lg:left-16 lg:top-[5%] lg:p-0 lg:text-[5vw]",
-          display,
-        ]}
+        class:list={["px-4 pt-12 sm:px-8 sm:pt-16 lg:absolute lg:left-16 lg:top-16 lg:p-0", heading]}
       >
         Somewhere<br />
         <span class={serif}>on the road</span>
