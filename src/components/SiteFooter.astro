@@ -50,8 +50,9 @@
  * studio's live site links to; the YouTube channel is the one that published the
  * studio's films.
  */
+import { email } from "../data/contact";
+
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
-const email = "hello@flyingturtlestudio.in";
 
 interface FooterLink {
   href: string;

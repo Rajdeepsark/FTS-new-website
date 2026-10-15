@@ -7,15 +7,19 @@
  *   section    white · padding 64px · label 20px above the text
  *   label      "[ Synopsis ]"  Inter 500 · 14/14 · uppercase · #0D0C0B at 50%
  *   text       Inter 400 · 32/120% · -0.03em · #0D0C0B
+ *   action     optional link under the text, drawn like the footer's email address:
+ *              same size as the text · underlined · then the "arrow outward"
  *
  * The text runs the full width at every size, between the 64px margins (the
  * design's line breaks at 1440), and steps down in size on smaller screens.
  */
 interface Props {
   label: string;
+  /** A call to action under the text, such as a screener request. */
+  action?: { label: string; href: string };
 }
 
-const { label } = Astro.props;
+const { label, action } = Astro.props;
 ---
 
 <section class="bg-white px-4 py-12 text-night sm:px-8 sm:py-16 lg:px-16" aria-label={label}>
@@ -23,4 +27,19 @@ const { label } = Astro.props;
   <p class="mt-4 text-lead sm:mt-5">
     <slot />
   </p>
+  {
+    action && (
+      <a class="group mt-8 inline-flex items-start text-lead sm:mt-10" href={action.href}>
+        <span class="underline underline-offset-[0.19em] [text-decoration-thickness:0.07em]">{action.label}</span>
+        <svg
+          class="size-[1.343em] shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6z" />
+        </svg>
+      </a>
+    )
+  }
 </section>

@@ -4,6 +4,7 @@ import ProjectHero from "../../components/ProjectHero.astro";
 import ProjectSynopsis from "../../components/ProjectSynopsis.astro";
 import ProjectChapters from "../../components/ProjectChapters.astro";
 import { chapters } from "../../data/scrollThatStoleTime";
+import { mailto } from "../../data/contact";
 
 // The design's facts panel holds template text (a Berlin museum, a Norwegian
 // award); these values come from the studio's own copy and the release poster.
@@ -13,6 +14,16 @@ const facts = [
   { label: "Location", lines: ["Guwahati, Assam,", "India"] },
   { label: "Awards", lines: ["Best Essay Film,", "FICIMAD 2026"] },
 ];
+
+// The synopsis ends on a request for a private screener: an email to Kaushik,
+// filled in for the visitor to sign.
+const screener = {
+  label: "Request a private screener",
+  href: mailto(
+    "Private screener request - The Scroll That Stole Time",
+    "Hi Kaushik, I’d like to request a private screener of The Scroll That Stole Time. - [your name]",
+  ),
+};
 ---
 
 <SiteLayout
@@ -33,7 +44,7 @@ const facts = [
     facts={facts}
   />
 
-  <ProjectSynopsis label="Synopsis">
+  <ProjectSynopsis label="Synopsis" action={screener}>
     A debut short film shot entirely with zero budget, The Scroll that Stole Time explores the impact of technology on
     our lives through the story of Aarav, a man lost in the world of digital distractions. Set in Guwahati, Assam, this
     guerrilla-style project reflects on the isolating effects of social media addiction. With just a Panasonic Lumix
