@@ -62,12 +62,12 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
             <li class="pointer" data-pointer={id} data-active={i === 0 ? "" : undefined}>
               <a class="group grid" href={`#${id}`} aria-label={title} aria-current={i === 0 ? "true" : undefined}>
                 <span class="row collapsed" aria-hidden="true">
-                  <span class="block text-[13px] uppercase leading-[14px] opacity-50 transition-opacity group-hover:opacity-80">
+                  <span class="block min-h-0 overflow-hidden text-[13px] uppercase leading-[14px] opacity-50 transition-opacity group-hover:opacity-80">
                     [ {title} ]
                   </span>
                 </span>
                 <span class="row expanded" aria-hidden="true">
-                  <span class="flex flex-col items-start gap-2.5">
+                  <span class="flex min-h-0 flex-col items-start gap-2.5 overflow-hidden">
                     <span class="flex items-center gap-2 text-[14px] font-medium uppercase leading-[14px]">
                       <span class="size-2.5 bg-current" />[ {number(i)} ]
                     </span>
@@ -134,42 +134,43 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
   /* ---- Pointers --------------------------------------------------------------- */
 
   /* A pointer is two rows, the label and the open state; the one not showing is
-     folded to no height, so opening one slides the list below it down. */
+     folded to no height, so opening one slides the list below it down. Each row
+     folds on a one-track grid of its own (1fr open, 0fr shut): with both rows as
+     flexible tracks of one grid, the browser sizes both to the taller row while
+     they change, and the list jumped 40px down and back at every chapter. */
   .pointer {
     transition: margin 0.5s ease;
-  }
-
-  .pointer a {
-    grid-template-rows: 1fr 0fr;
-    transition: grid-template-rows 0.5s ease;
   }
 
   /* The row on its way out fades quickly; the one coming in waits for it, so the
      two never show at once. */
   .row {
-    min-height: 0;
-    overflow: hidden;
-    transition: opacity 0.2s ease;
+    display: grid;
+    grid-template-rows: 1fr;
+    transition:
+      grid-template-rows 0.5s ease,
+      opacity 0.2s ease;
   }
 
   .expanded {
+    grid-template-rows: 0fr;
     opacity: 0;
   }
 
   .pointer:not([data-active]) .collapsed,
   .pointer[data-active] .expanded {
-    transition: opacity 0.35s ease 0.2s;
-  }
-
-  .pointer[data-active] a {
-    grid-template-rows: 0fr 1fr;
+    transition:
+      grid-template-rows 0.5s ease,
+      opacity 0.35s ease 0.2s;
   }
 
   .pointer[data-active] .collapsed {
+    grid-template-rows: 0fr;
     opacity: 0;
   }
 
   .pointer[data-active] .expanded {
+    grid-template-rows: 1fr;
     opacity: 1;
   }
 
@@ -258,7 +259,6 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
 
   @media (prefers-reduced-motion: reduce) {
     .pointer,
-    .pointer a,
     .row,
     .pointer:not([data-active]) .collapsed,
     .pointer[data-active] .expanded,
