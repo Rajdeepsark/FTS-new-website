@@ -91,18 +91,26 @@ const links = [
   /* Legibility is settled here, for any backdrop, not left to the photo behind.
      Light tone: contrast(0.5) brightness(0.48) squeezes the backdrop into 12%–36%
      brightness before the white lettering goes on, and saturate(200%) gives the
-     colour back without lifting it. Dark tone: a 60% white tint does the same for
-     the ink lettering. Measured in Chrome with the page grain on, worst pixel
-     under a label: 5.3:1 over flat white and 4.7:1 with the lozenge on top (the
-     worst cases), about 7:1 over the hero clip, 5.6:1 for ink over flat black. */
+     colour back without lifting it. Measured in Chrome with the page grain on,
+     worst pixel under a label: 5.3:1 over flat white and 4.7:1 with the lozenge on
+     top (the worst cases), about 7:1 over the hero clip.
+     Dark tone: clear glass, as in Apple's light mode. contrast(0.333) brightness(1.5)
+     lifts the backdrop into 50%–100% (the lens does the same) under a 12% white
+     tint, so the page shows through, lightened, and black type behind reads as
+     soft grey. Ink over flat black, the worst case: about 4.9:1. The rim and an inner
+     glow give the glass its thickness, and a soft, wide shadow lifts it off the
+     paper. */
   nav {
     --glass-ink: #16251f;
-    --glass-tint: rgb(255 255 255 / 0.6);
-    --glass-optics: contrast(1) brightness(1.06) saturate(170%);
-    --glass-rim: rgb(255 255 255 / 0.95);
-    --glass-rim-soft: rgb(255 255 255 / 0.3);
-    --glass-depth: 0 12px 36px -12px rgb(0 0 0 / 0.32), 0 1px 3px rgb(0 0 0 / 0.08);
-    --glass-glow: inset 0 1px 0 rgb(255 255 255 / 0.7), inset 0 -8px 12px -8px rgb(22 37 31 / 0.1);
+    --glass-tint: rgb(255 255 255 / 0.12);
+    --glass-blur: 10px;
+    --glass-optics: contrast(0.333) brightness(1.5) saturate(180%);
+    --glass-rim: #fff;
+    --glass-rim-soft: rgb(255 255 255 / 0.25);
+    --glass-depth: 0 10px 32px -10px rgb(0 0 0 / 0.2), 0 1px 3px rgb(0 0 0 / 0.06);
+    --glass-glow:
+      inset 1px 1.5px 1px -0.5px rgb(255 255 255 / 0.95), inset -1px -1.5px 1px -0.5px rgb(255 255 255 / 0.6),
+      inset 0 0 14px rgb(255 255 255 / 0.35);
     --glass-solid: #f7f8f4;
     --lozenge: rgb(22 37 31 / 0.08);
   }
@@ -110,6 +118,7 @@ const links = [
   nav[data-tone="light"] {
     --glass-ink: #fff;
     --glass-tint: rgb(255 255 255 / 0);
+    --glass-blur: 16px;
     --glass-optics: contrast(0.5) brightness(0.48) saturate(200%);
     --glass-rim: rgb(255 255 255 / 0.6);
     --glass-rim-soft: rgb(255 255 255 / 0.08);
@@ -179,8 +188,8 @@ const links = [
     isolation: isolate;
     border-radius: 120px;
     background-color: var(--glass-tint);
-    -webkit-backdrop-filter: blur(16px) var(--glass-optics);
-    backdrop-filter: blur(16px) var(--glass-optics);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) var(--glass-optics);
+    backdrop-filter: blur(var(--glass-blur)) var(--glass-optics);
     box-shadow: var(--glass-depth), var(--glass-glow);
     color: var(--glass-ink);
   }
@@ -221,23 +230,37 @@ const links = [
     pointer-events: none;
   }
 
-  /* Refraction, for the links capsule in the light tone (the dark tone only ever sits
-     on flat paper, where there is nothing to bend). The lens filter frosts and
-     grades the backdrop itself, so it replaces the whole list above. */
-  nav[data-tone="light"] .glass[data-refract] {
-    -webkit-backdrop-filter: var(--glass-lens);
-    backdrop-filter: var(--glass-lens);
+  /* Refraction, where the script has drawn a lens. The lens filter frosts and grades
+     the backdrop itself, so it replaces the whole list above: the bright lens under
+     ink lettering, the dim one under white. */
+  .glass[data-refract] {
+    -webkit-backdrop-filter: var(--glass-lens-bright);
+    backdrop-filter: var(--glass-lens-bright);
   }
 
-  /* The button: glass tinted almost to white, in either tone. */
+  nav[data-tone="light"] .links[data-refract] {
+    -webkit-backdrop-filter: var(--glass-lens-dim);
+    backdrop-filter: var(--glass-lens-dim);
+  }
+
+  /* The button: glass tinted almost to white, in either tone. On paper, through the
+     lens, which already lifts the backdrop, it can be clearer; over photos it stays
+     nearly white, or the dark picture turns it grey. */
   .glass-prominent {
     --glass-ink: #000;
     --glass-tint: rgb(255 255 255 / 0.86);
+    --glass-blur: 16px;
     --glass-optics: contrast(1) brightness(1) saturate(170%);
     --glass-rim: #fff;
     --glass-rim-soft: rgb(255 255 255 / 0.5);
-    --glass-glow: inset 0 1px 0 #fff, inset 0 -8px 12px -8px rgb(0 0 0 / 0.1);
+    --glass-glow:
+      inset 1px 1.5px 1px -0.5px #fff, inset -1px -1.5px 1px -0.5px rgb(255 255 255 / 0.7),
+      inset 0 0 14px rgb(255 255 255 / 0.4);
     --glass-solid: #fff;
+  }
+
+  nav[data-tone="dark"] .glass-prominent[data-refract] {
+    --glass-tint: rgb(255 255 255 / 0.45);
   }
 
   /* ---- Touch: only what can be pressed responds --------------------------------- */
@@ -251,6 +274,10 @@ const links = [
     .glass-prominent:hover {
       --glass-tint: #fff;
       transform: scale(1.03);
+    }
+
+    nav[data-tone="dark"] .glass-prominent[data-refract]:hover {
+      --glass-tint: rgb(255 255 255 / 0.75);
     }
   }
 
@@ -310,7 +337,8 @@ const links = [
 
   @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
     .glass,
-    nav[data-tone="light"] .glass[data-refract] {
+    .glass[data-refract],
+    nav[data-tone="light"] .links[data-refract] {
       background-color: var(--glass-solid);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -408,6 +436,6 @@ const links = [
   }
 
   // ---- Refraction ---------------------------------------------------------------
-  // The links capsule gets a lens; the style block uses it in the light tone only.
-  if (list) refract(list);
+  // Both capsules get lenses; the style block picks one per tone.
+  nav?.querySelectorAll<HTMLElement>(".glass").forEach((capsule) => refract(capsule));
 </script>
