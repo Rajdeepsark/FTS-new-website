@@ -3,7 +3,7 @@
  * One project poster with its centred action pill and caption.
  *
  *   feature        full-width 1312 × 697 poster, caption laid over the bottom-left
- *                  (below the poster on small screens), "View case study" pill
+ *                  (below the poster on small screens), "Explore the film" pill
  *   image-first    half-width card: 646 × 448 poster, caption underneath
  *   caption-first  half-width card: caption on top, poster fills the rest of the row
  *
@@ -39,7 +39,8 @@ interface Props {
 
 const { project, variant } = Astro.props;
 const { number, title, description, action, href, image, uncropped = false } = project;
-const label = action === "watch" ? "Watch" : "View case study";
+// Was "View case study" until the client asked for a different call to action.
+const label = action === "watch" ? "Watch" : "Explore the film";
 // Videos live on YouTube: open them in a new tab so the site stays where it was.
 const external = /^https?:\/\//.test(href);
 const linkTarget = external ? { target: "_blank", rel: "noopener noreferrer" } : {};
