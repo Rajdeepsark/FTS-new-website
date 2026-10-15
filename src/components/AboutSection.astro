@@ -15,7 +15,8 @@
  *                 left    219 × 170 at (71, 381)
  *                 right   181 × 160 at (1259, 292), flush with the right edge
  *                 bottom  410 × 220 at (839, 601)
- *               Below `lg` they drop into a loose two-column grid under the text.
+ *               Below `lg` they sit in a grid under the text: the first two side
+ *               by side at the same 9:7 shape, the third across the full width.
  *
  * From `lg` up the section is one screen tall (100svh) and the frame is scaled to
  * fit inside it: `--u` is one design pixel, the smaller of a 1440th of the width and
@@ -34,7 +35,8 @@
  * at `to` when its bottom leaves at the top, and it trails the scroll slightly so it
  * glides. The right card only moves further off its edge, never away from it, and
  * the bottom card only moves down, away from the text. Paths are in design pixels,
- * so they scale with the frame from `lg` up; below it they are halved.
+ * so they scale with the frame. Below `lg` the cards hold still, so the grid stays
+ * lined up and nothing slides off the edge.
  *
  * The photos live in `public/about/`, cropped to their card shapes from the
  * 1100 × 701 originals in `public/services/` (photography.jpg, ad-films.jpg). The design
@@ -83,11 +85,11 @@ const cards: Card[] = [
       width: 789,
       height: 701,
     },
-    aspect: "aspect-[9/8]",
+    aspect: "aspect-[9/7] lg:aspect-[9/8]",
     place: "lg:right-0",
     top: 292,
     width: 181,
-    grid: "mt-12",
+    grid: "",
     // Keeps the caption clear of the edge the card drifts off.
     captionClass: "lg:pr-6",
     from: [0, 48],
@@ -106,7 +108,7 @@ const cards: Card[] = [
     place: "lg:left-[58.3%]",
     top: 601,
     width: 410,
-    grid: "col-span-2 w-3/4 justify-self-end",
+    grid: "col-span-2",
     from: [-20, 0],
     to: [20, 32],
   },
@@ -254,7 +256,7 @@ const cards: Card[] = [
     let last = 0;
 
     const tick = (now: number) => {
-      if (!motion.matches) {
+      if (!motion.matches || !wide.matches) {
         cards.forEach(({ el }) => el.style.removeProperty("transform"));
         shown = null;
         running = false;
@@ -273,8 +275,8 @@ const cards: Card[] = [
       const t = Math.abs(goal - from) < 0.0005 ? goal : from + (goal - from) * pull;
       shown = t;
 
-      // Paths are in design pixels: scaled with the frame from `lg` up, halved below.
-      const reach = wide.matches ? Math.min(window.innerWidth / 1440, window.innerHeight / 905) : 0.5;
+      // Paths are in design pixels, scaled with the frame.
+      const reach = Math.min(window.innerWidth / 1440, window.innerHeight / 905);
       for (const { el, x0, y0, x1, y1 } of cards) {
         const x = (x0 + (x1 - x0) * t) * reach;
         const y = (y0 + (y1 - y0) * t) * reach;
