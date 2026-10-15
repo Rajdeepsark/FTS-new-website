@@ -23,7 +23,9 @@
  * multiple of it, so the statement and the cards never run into each other however
  * short the screen. A screen taller than the scaled frame centres it vertically.
  * Across the width the cards keep their place as a share of the screen (the right
- * one flush with its edge) and the statement stays centred.
+ * one flush with its edge) and the statement stays centred. The 14px label and
+ * card captions stop shrinking at 12px (they reached 10px on a 1024 × 768 screen),
+ * and the label column widens to keep "( We are )" clear of the heading.
  *
  * Scroll drift (skipped under prefers-reduced-motion and without JS): while the
  * section crosses the screen, each card slides a few dozen pixels along its own
@@ -175,21 +177,25 @@ const cards: Card[] = [
     .about {
       --u: min(calc(100vw / 1440), calc(100svh / 905));
       --frame-top: calc((100svh - 905 * var(--u)) / 2);
+      /* The design's 14px small print, stopping at 12px. */
+      --small: max(12px, calc(14 * var(--u)));
+      /* 90 design px, or room for the label at 12px. */
+      --label-column: max(calc(90 * var(--u)), 80px);
       height: 100svh;
       padding: calc(var(--frame-top) + 108 * var(--u)) 0 0;
     }
 
     .statement {
-      max-width: calc(506 * var(--u));
-      grid-template-columns: calc(90 * var(--u)) 1fr;
+      max-width: calc(var(--label-column) + 416 * var(--u));
+      grid-template-columns: var(--label-column) 1fr;
       row-gap: calc(24 * var(--u));
     }
 
     .label {
       margin-top: calc(16 * var(--u));
       padding: calc(4.7 * var(--u)) 0 calc(5.71 * var(--u));
-      font-size: calc(14 * var(--u));
-      line-height: calc(14 * var(--u));
+      font-size: var(--small);
+      line-height: var(--small);
     }
 
     .heading {
@@ -217,13 +223,13 @@ const cards: Card[] = [
     }
 
     .card-number {
-      font-size: calc(14 * var(--u));
-      line-height: calc(14 * var(--u));
+      font-size: var(--small);
+      line-height: var(--small);
     }
 
     .card-title {
       margin-top: calc(6 * var(--u));
-      font-size: calc(14 * var(--u));
+      font-size: var(--small);
     }
   }
 </style>
