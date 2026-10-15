@@ -7,6 +7,9 @@
  *   image-first    half-width card: 646 × 448 poster, caption underneath
  *   caption-first  half-width card: caption on top, poster fills the rest of the row
  *
+ * Below `md`, where the cards run in one column (see `WorkSection`), each card
+ * takes its place by project number and every caption sits under its poster.
+ *
  * An `uncropped` project (an image with lettering of its own, like a release
  * poster) is shown whole instead: the frame takes the image's shape at every
  * width, the parallax below leaves it alone, and a feature caption sits under the
@@ -59,8 +62,19 @@ const posterShape = wholeShape
     }[variant];
 ---
 
-<article class:list={["card relative flex flex-col", overlay && "md:isolate", variant !== "feature" && "md:h-full"]}>
-  {variant === "caption-first" && <ProjectCaption number={number} description={description} />}
+<article
+  class:list={[
+    "card relative flex w-full flex-col max-md:order-[var(--order)]",
+    overlay && "md:isolate",
+    variant !== "feature" && "md:h-full",
+  ]}
+  style={`--order: ${Number(number)}`}
+>
+  {
+    variant === "caption-first" && (
+      <ProjectCaption number={number} description={description} class="max-md:order-last" />
+    )
+  }
 
   <div class:list={["poster relative isolate w-full overflow-hidden bg-[#1a1917]", posterShape]} style={wholeShape}>
     {

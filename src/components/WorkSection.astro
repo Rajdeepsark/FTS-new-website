@@ -12,6 +12,8 @@
  *
  * Project data lives in `src/data/projects.ts`; rows are derived from its order:
  * every third entry (0, 3, 6, …) is a feature, the two after it form a pair.
+ * Below `md` the rows dissolve into one column in project-number order, every
+ * poster above its caption (see `ProjectCard`).
  */
 import { projects, type Project } from "../data/projects";
 import ProjectCard from "./ProjectCard.astro";
@@ -48,11 +50,11 @@ for (let i = 0; i < projects.length; ) {
     {
       rows.map((row) =>
         row.kind === "feature" ? (
-          <div class="w-full">
+          <div class="w-full max-md:contents">
             <ProjectCard project={row.project} variant="feature" />
           </div>
         ) : (
-          <div class="grid w-full gap-5 md:grid-cols-2">
+          <div class="grid w-full gap-5 max-md:contents md:grid-cols-2">
             <ProjectCard project={row.left} variant="image-first" />
             <ProjectCard project={row.right} variant="caption-first" />
           </div>
