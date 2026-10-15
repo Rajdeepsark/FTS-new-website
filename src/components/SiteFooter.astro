@@ -16,7 +16,8 @@
  *               address                 Inter 400 · 32/120% · -0.03em · underlined,
  *                                       then a 43px arrow (Material "arrow outward")
  *   bar         72px · padding 16px 64px · white at 10% · space-between
- *               links 13/14 uppercase · gap 24px · 5px dot after PROJECTS and SERVICES
+ *               links 13/14 uppercase · gap 24px · a 5px dot centred between
+ *               PROJECTS, SERVICES and ABOUT, level with the lettering (as in the nav)
  *               copyright 16/20, centred, 214px (two lines)
  *               credit 16/20, right-aligned; the two side blocks are both 411px
  *               in Figma, here two equal grid columns, which centres the copyright
@@ -55,15 +56,15 @@ const email = "hello@flyingturtlestudio.in";
 interface FooterLink {
   href: string;
   label: string;
-  /** The 5px dot of the design, after PROJECTS and SERVICES. */
+  /** The design's 5px separator dot, in front of SERVICES and ABOUT. */
   dot?: boolean;
   external?: boolean;
 }
 
 const links: FooterLink[] = [
-  { href: "/#work", label: "Projects", dot: true },
+  { href: "/#work", label: "Projects" },
   { href: "/#services", label: "Services", dot: true },
-  { href: "/about", label: "About" },
+  { href: "/about", label: "About", dot: true },
   { href: "https://www.instagram.com/flying_turtle_studio/", label: "Instagram", external: true },
   { href: "https://www.youtube.com/@flyingturtlestudio", label: "Youtube", external: true },
 ];
@@ -133,7 +134,13 @@ const big = "text-lead lg:text-[clamp(18px,calc(32*var(--u)),32px)]";
               >
                 {label}
               </a>
-              {dot && <span class="absolute -right-[10px] top-[5px] -z-10 size-[5px] rounded-full bg-black" aria-hidden="true" />}
+              {/* Centred in the 24px gap before the link, level with the middle of its lettering. */}
+              {dot && (
+                <span
+                  class="absolute -left-[14.5px] top-[calc(50%-0.5px)] -z-10 size-[5px] -translate-y-1/2 rounded-full bg-black"
+                  aria-hidden="true"
+                />
+              )}
             </li>
           ))
         }

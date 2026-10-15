@@ -4,13 +4,18 @@
  * in glass after Apple's Liquid Glass.
  *
  *   navigation  row · gap 6px · 32px from the bottom edge (20px on phones)
- *   links       glass capsule · padding 16px 26px · radius 120px
- *               Inter 400 · 13/14 · uppercase · 5 × 5 dot after each link but the last
+ *   links       glass capsule · padding 16px 14px · radius 120px · each link padded
+ *               10px a side, links 20px apart (the capsule is as wide as the
+ *               design's 26px padding with 6px links; the room moved onto the links)
+ *               Inter 400 · 13/14 (the `ui` type size) · uppercase · a 5 × 5 dot
+ *               centred between each pair of links, level with the lettering
  *   Talk to us  prominent glass capsule: white-tinted, #000 label · padding 16px 32px
- *   phones      one line, as the client asked: tighter capsules (padding 12px and
- *               18px, links 6px apart), and below 392px wide the type, padding and
- *               gaps shrink together to keep it on one line, down to 11px type
- *               (about 335px wide); narrower screens wrap the button under the links
+ *   phones      always one line, as the client asked: tighter capsules (padding
+ *               6px with 8px links, and 18px; links 6px apart)
+ *   size        every length is in --u, one design pixel, which follows the `ui`
+ *               type size down the type scale (`global.css`) and shrinks further
+ *               wherever the phone row would not fit (about 9px type on a 280px
+ *               screen); the row never wraps
  *
  * Where they go: Projects and Services scroll to those homepage sections (from any
  * other page they open the homepage there), About is its own page, and Talk to us
@@ -41,15 +46,16 @@
  * ink lettering on milky glass. Without JS it stays in the fallback tone.
  */
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
+// `dot`: the separator dot in front of the link.
 const links = [
-  { href: "/#work", label: "Projects", dot: true },
+  { href: "/#work", label: "Projects", dot: false },
   { href: "/#services", label: "Services", dot: true },
-  { href: "/about", label: "About", dot: false },
+  { href: "/about", label: "About", dot: true },
 ];
 ---
 
 <nav
-  class="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex flex-wrap items-stretch justify-center gap-1.5 px-3 sm:bottom-8 sm:px-4"
+  class="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex items-stretch justify-center gap-1.5 px-3 sm:bottom-8 sm:px-4"
   aria-label="Main navigation"
   data-floating-nav
   data-tone="dark"
@@ -64,8 +70,8 @@ const links = [
           aria-current={currentPath === href ? "page" : undefined}
         >
           <span class="relative inline-block">
+            {dot && <span class="dot absolute top-1/2 size-[5px] -translate-y-1/2 rounded-full bg-current" aria-hidden="true" />}
             {label}
-            {dot && <span class="dot absolute top-0 size-[5px] rounded-full bg-current" aria-hidden="true" />}
           </span>
         </a>
       </li>
@@ -114,25 +120,32 @@ const links = [
   }
 
   /* ---- Size ------------------------------------------------------------------- */
-  /* --u is one design pixel: 1px, except on phones narrower than the compact row
-     (366px plus the 12px margins and a little slack), where it shrinks so the row
-     still fits, stopping at 11px type. */
+  /* --u is one design pixel: the `ui` type size over its design 13px, so the
+     whole row follows the type scale. On phones it also stops where the compact
+     row would outgrow the screen: 360 design px of type, padding and gaps, plus
+     the fixed 6px between the capsules and the 12px margins (and 2px of slack).
+     --gap is the space between two links; each dot sits in its middle. --pad is
+     each link's own side padding: most of the capsule's inner room goes to the
+     links, so the lozenge sits as far in from the capsule's ends as from its
+     top and bottom. */
   nav {
-    --u: 1px;
+    --u: calc(var(--text-ui) / 13);
+    --gap: calc(6 * var(--u));
+    --pad: calc(8 * var(--u));
     font-size: calc(13 * var(--u));
   }
 
   .links {
-    gap: calc(6 * var(--u));
-    padding-inline: calc(12 * var(--u));
-  }
-
-  .link {
+    gap: var(--gap);
     padding-inline: calc(6 * var(--u));
   }
 
+  .link {
+    padding-inline: var(--pad);
+  }
+
   .dot {
-    right: calc(-10 * var(--u));
+    left: calc(-1 * var(--pad) - var(--gap) / 2 - 2.5px);
   }
 
   .glass-prominent {
@@ -141,18 +154,22 @@ const links = [
 
   @media (width < 40rem) {
     nav {
-      --u: max(11px / 13, min(1px, (100vw - 24px) / 368));
+      --u: min(var(--text-ui) / 13, (100vw - 30px) / 362);
     }
   }
 
   @media (width >= 40rem) {
+    nav {
+      --gap: calc(20 * var(--u));
+      --pad: calc(10 * var(--u));
+    }
+
     .links {
-      gap: 20px;
-      padding-inline: 26px;
+      padding-inline: calc(14 * var(--u));
     }
 
     .glass-prominent {
-      padding-inline: 32px;
+      padding-inline: calc(32 * var(--u));
     }
   }
 
@@ -350,12 +367,12 @@ const links = [
   if (nav && list && lozenge) {
     const links = list.querySelectorAll<HTMLElement>("a");
     const home = list.querySelector<HTMLElement>('a[aria-current="page"]');
-    const wide = window.matchMedia("(width >= 40rem)");
     let target: HTMLElement | null = null;
 
-    // Px the lozenge extends past a link's label on each side: 18 design pixels,
-    // 7 in the compact phone row, where 18 would cover the dot before it.
-    const reach = () => (wide.matches ? 18 : 7) * (parseFloat(getComputedStyle(nav).fontSize) / 13);
+    // Px the lozenge extends past a link's label on each side: up to the dots,
+    // half the space between two labels less half a dot and 2px clear of it.
+    const reach = () =>
+      parseFloat(getComputedStyle(links[0]).paddingLeft) + parseFloat(getComputedStyle(list).columnGap) / 2 - 4.5;
 
     const place = (link: HTMLElement | null) => {
       target = link;
