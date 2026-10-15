@@ -7,6 +7,10 @@
  *   links       glass capsule · padding 16px 26px · radius 120px
  *               Inter 400 · 13/14 · uppercase · 5 × 5 dot after each link but the last
  *   Talk to us  prominent glass capsule: white-tinted, #000 label · padding 16px 32px
+ *   phones      one line, as the client asked: tighter capsules (padding 12px and
+ *               18px, links 6px apart), and below 392px wide the type, padding and
+ *               gaps shrink together to keep it on one line, down to 11px type
+ *               (about 335px wide); narrower screens wrap the button under the links
  *
  * Where they go: Projects and Services scroll to those homepage sections (from any
  * other page they open the homepage there), About is its own page, and Talk to us
@@ -45,23 +49,23 @@ const links = [
 ---
 
 <nav
-  class="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex flex-wrap items-stretch justify-center gap-1.5 px-4 sm:bottom-8"
+  class="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex flex-wrap items-stretch justify-center gap-1.5 px-3 sm:bottom-8 sm:px-4"
   aria-label="Main navigation"
   data-floating-nav
   data-tone="dark"
 >
-  <ul class="glass pointer-events-auto flex items-center gap-3 px-[18px] py-4 sm:gap-5 sm:px-[26px]" data-nav-links>
+  <ul class="links glass pointer-events-auto flex items-center py-4" data-nav-links>
     <li class="lozenge" aria-hidden="true" data-nav-lozenge></li>
     {links.map(({ href, label, dot }) => (
       <li class="flex items-center">
         <a
-          class="link relative block rounded-full px-1.5 py-[5px] text-[13px] font-normal uppercase leading-[14px]"
+          class="link relative block whitespace-nowrap rounded-full py-[5px] font-normal uppercase leading-[14px]"
           href={href}
           aria-current={currentPath === href ? "page" : undefined}
         >
           <span class="relative inline-block">
             {label}
-            {dot && <span class="absolute -right-[10px] top-0 size-[5px] rounded-full bg-current" aria-hidden="true" />}
+            {dot && <span class="dot absolute top-0 size-[5px] rounded-full bg-current" aria-hidden="true" />}
           </span>
         </a>
       </li>
@@ -69,7 +73,7 @@ const links = [
   </ul>
 
   <a
-    class="glass glass-prominent pointer-events-auto flex items-center justify-center self-stretch px-8 py-4 text-[13px] font-normal uppercase leading-[14px]"
+    class="glass glass-prominent pointer-events-auto flex items-center justify-center self-stretch whitespace-nowrap py-4 font-normal uppercase leading-[14px]"
     href="#contact"
   >
     Talk to us
@@ -107,6 +111,49 @@ const links = [
     --glass-glow: inset 0 1px 0 rgb(255 255 255 / 0.2), inset 0 0 14px rgb(255 255 255 / 0.07);
     --glass-solid: #262523;
     --lozenge: rgb(255 255 255 / 0.06);
+  }
+
+  /* ---- Size ------------------------------------------------------------------- */
+  /* --u is one design pixel: 1px, except on phones narrower than the compact row
+     (366px plus the 12px margins and a little slack), where it shrinks so the row
+     still fits, stopping at 11px type. */
+  nav {
+    --u: 1px;
+    font-size: calc(13 * var(--u));
+  }
+
+  .links {
+    gap: calc(6 * var(--u));
+    padding-inline: calc(12 * var(--u));
+  }
+
+  .link {
+    padding-inline: calc(6 * var(--u));
+  }
+
+  .dot {
+    right: calc(-10 * var(--u));
+  }
+
+  .glass-prominent {
+    padding-inline: calc(18 * var(--u));
+  }
+
+  @media (width < 40rem) {
+    nav {
+      --u: max(11px / 13, min(1px, (100vw - 24px) / 368));
+    }
+  }
+
+  @media (width >= 40rem) {
+    .links {
+      gap: 20px;
+      padding-inline: 26px;
+    }
+
+    .glass-prominent {
+      padding-inline: 32px;
+    }
   }
 
   /* ---- Material ---------------------------------------------------------------- */
@@ -301,22 +348,27 @@ const links = [
 
   // ---- Lozenge ----------------------------------------------------------------
   if (nav && list && lozenge) {
-    const REACH = 12; // px the lozenge extends past a link's label on each side
     const links = list.querySelectorAll<HTMLElement>("a");
     const home = list.querySelector<HTMLElement>('a[aria-current="page"]');
+    const wide = window.matchMedia("(width >= 40rem)");
     let target: HTMLElement | null = null;
+
+    // Px the lozenge extends past a link's label on each side: 18 design pixels,
+    // 7 in the compact phone row, where 18 would cover the dot before it.
+    const reach = () => (wide.matches ? 18 : 7) * (parseFloat(getComputedStyle(nav).fontSize) / 13);
 
     const place = (link: HTMLElement | null) => {
       target = link;
       if (!link) return nav.removeAttribute("data-lozenge");
 
-      const x = link.getBoundingClientRect().left - list.getBoundingClientRect().left - REACH;
+      const label = link.firstElementChild as HTMLElement;
+      const x = link.offsetLeft + label.offsetLeft - reach();
       const appearing = !nav.hasAttribute("data-lozenge");
       // Coming out of hiding it fades in where it is needed; it only glides
       // between links.
       if (appearing) lozenge.style.transition = "none";
       lozenge.style.setProperty("--lozenge-x", `${x.toFixed(1)}px`);
-      lozenge.style.setProperty("--lozenge-width", `${(link.offsetWidth + REACH * 2).toFixed(1)}px`);
+      lozenge.style.setProperty("--lozenge-width", `${(label.offsetWidth + reach() * 2).toFixed(1)}px`);
       if (appearing) {
         void lozenge.offsetWidth;
         lozenge.style.removeProperty("transition");
