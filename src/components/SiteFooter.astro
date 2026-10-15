@@ -68,8 +68,8 @@ const links: FooterLink[] = [
   { href: "https://www.youtube.com/@flyingturtlestudio", label: "Youtube", external: true },
 ];
 
-const big =
-  "text-[20px] leading-[120%] tracking-[-0.03em] sm:text-[22px] lg:text-[clamp(18px,calc(32*var(--u)),32px)]";
+// The `lead` type size; from `lg` it scales with the footer frame instead.
+const big = "text-lead lg:text-[clamp(18px,calc(32*var(--u)),32px)]";
 ---
 
 <footer
@@ -90,7 +90,7 @@ const big =
     class="flex flex-col gap-6 px-4 pt-8 sm:gap-10 sm:px-16 sm:pt-12 lg:flex-row lg:items-end lg:justify-between lg:gap-[min(200px,calc(200*var(--u)))] lg:pt-[min(100px,calc(100*var(--u)))]"
   >
     <div class="flex flex-1 flex-col items-start gap-3">
-      <p class="pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px]">( Tell us your story )</p>
+      <p class="pb-[5.71px] pt-[4.7px] text-label font-medium uppercase">( Tell us your story )</p>
       <p class:list={["max-w-[21.85em]", big]}>
         Share with us your vision, brand essence, musical inspirations, script concepts, dreams, and heartfelt
         experiences. Let's bring your story to life through our creative lens.
@@ -98,7 +98,7 @@ const big =
     </div>
 
     <div class="flex shrink-0 flex-col items-start justify-between gap-3 lg:self-stretch">
-      <p class="text-[14px] font-medium uppercase leading-[14px]">( Contact us today )</p>
+      <p class="text-label font-medium uppercase">( Contact us today )</p>
       <a class:list={["group inline-flex items-start", big]} href={`mailto:${email}`}>
         <span class="underline underline-offset-[0.19em] [text-decoration-thickness:0.07em]">{email}</span>
         <svg
@@ -125,7 +125,7 @@ const big =
           links.map(({ href, label, dot, external }) => (
             <li class="relative isolate">
               <a
-                class="block pb-[5.71px] pt-[4.7px] text-[13px] uppercase leading-[14px] transition-opacity hover:opacity-70"
+                class="block pb-[5.71px] pt-[4.7px] text-ui uppercase transition-opacity hover:opacity-70"
                 href={href}
                 target={external ? "_blank" : undefined}
                 rel={external ? "noopener noreferrer" : undefined}
@@ -140,12 +140,12 @@ const big =
       </ul>
     </nav>
 
-    <p class="w-[214px] text-[16px] leading-[20px] lg:text-center">
+    <p class="w-[214px] text-body leading-[1.25] lg:text-center">
       © Flying Turtle Studio {new Date().getFullYear()}. All Rights Reserved
     </p>
 
     <a
-      class="text-[16px] leading-[20px] transition-opacity hover:opacity-70 xl:justify-self-end"
+      class="text-body leading-[1.25] transition-opacity hover:opacity-70 xl:justify-self-end"
       href="https://poroflo.co/"
       target="_blank"
       rel="noopener"

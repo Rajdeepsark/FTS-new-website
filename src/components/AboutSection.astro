@@ -120,15 +120,15 @@ const cards: Card[] = [
   data-about
 >
   <div class="statement mx-auto grid max-w-[506px] gap-y-6 md:grid-cols-[90px_1fr]">
-    <p class="label pb-[5.71px] pt-[4.7px] text-[14px] font-medium uppercase leading-[14px] text-night md:mt-4 md:whitespace-nowrap">
+    <p class="label pb-[5.71px] pt-[4.7px] text-label font-medium uppercase text-night md:mt-4 md:whitespace-nowrap">
       ( We are )
     </p>
-    <h2 id="about-heading" class="heading text-[36px] font-normal leading-[120%] tracking-[-0.03em] text-night sm:text-[48px]">
+    <h2 id="about-heading" class="heading text-heading font-normal text-night">
       <span class="font-serif">A Creative Studio</span><br />
       for meaningful<br />
       <span class="font-serif">Storytelling</span>
     </h2>
-    <div class="body space-y-7 text-[17px] leading-[150%] tracking-[-0.02em] text-night sm:text-[20px] md:col-start-2 md:mt-2">
+    <div class="body space-y-7 text-body-lg tracking-[-0.02em] text-night md:col-start-2 md:mt-2">
       <p>
         Flying Turtle Studio is a creative production house built on the belief that the most memorable
         stories come from thinking beyond the obvious.
@@ -160,8 +160,8 @@ const cards: Card[] = [
             />
           </div>
           <figcaption class:list={["mt-3", captionClass]}>
-            <p class="card-number text-[14px] font-medium uppercase leading-[14px] text-night/50">( {number} )</p>
-            <p class="card-title mt-1.5 text-[14px] leading-[130%] tracking-[-0.03em] text-night">{caption}</p>
+            <p class="card-number text-label font-medium uppercase text-night/50">( {number} )</p>
+            <p class="card-title mt-1.5 text-caption text-night">{caption}</p>
           </figcaption>
         </figure>
       ))

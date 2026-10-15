@@ -62,16 +62,16 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
             <li class="pointer" data-pointer={id} data-active={i === 0 ? "" : undefined}>
               <a class="group grid" href={`#${id}`} aria-label={title} aria-current={i === 0 ? "true" : undefined}>
                 <span class="row collapsed" aria-hidden="true">
-                  <span class="block min-h-0 overflow-hidden text-[13px] uppercase leading-[14px] opacity-50 transition-opacity group-hover:opacity-80">
+                  <span class="block min-h-0 overflow-hidden text-ui uppercase opacity-50 transition-opacity group-hover:opacity-80">
                     [ {title} ]
                   </span>
                 </span>
                 <span class="row expanded" aria-hidden="true">
                   <span class="flex min-h-0 flex-col items-start gap-2.5 overflow-hidden">
-                    <span class="flex items-center gap-2 text-[14px] font-medium uppercase leading-[14px]">
+                    <span class="flex items-center gap-2 text-label font-medium uppercase">
                       <span class="size-2.5 bg-current" />[ {number(i)} ]
                     </span>
-                    <span class="text-[20px] leading-[150%] tracking-[-0.03em]">{title}</span>
+                    <span class="text-body-lg">{title}</span>
                   </span>
                 </span>
               </a>
@@ -92,17 +92,17 @@ const number = (i: number) => String(i + 1).padStart(2, "0");
             data-current={i === 0 ? "" : undefined}
           >
             <header class="flex flex-col items-start gap-2.5 lg:sr-only" data-fade>
-              <p class="flex items-center gap-2 text-[14px] font-medium uppercase leading-[14px]">
+              <p class="flex items-center gap-2 text-label font-medium uppercase">
                 <span class="size-2.5 bg-current" aria-hidden="true" />[ {number(i)} ]
               </p>
-              <h2 id={`${id}-title`} class="text-[20px] leading-[150%] tracking-[-0.03em]">
+              <h2 id={`${id}-title`} class="text-body-lg">
                 {title}
               </h2>
             </header>
 
             {blocks.map((block, b) =>
               typeof block === "string" ? (
-                <p class="text-[16px] leading-[150%] text-black" style={`--i: ${b}`} data-fade>
+                <p class="text-body text-black" style={`--i: ${b}`} data-fade>
                   {block}
                 </p>
               ) : (

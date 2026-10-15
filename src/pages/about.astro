@@ -20,18 +20,18 @@
  *                set to the two edges like the footer's row, which follows on the
  *                same cream
  *
- * Every heading is the homepage's: 48/120% · -0.03em (36 on phones), with the serif
+ * Every heading is the homepage's, the `heading` type size (48/120% · -0.03em), with the serif
  * run at 1.08em. Labels are "[ … ]" as on the project page and the live site.
  * Mentions of The Scroll That Stole Time link to its case study.
  */
 import SiteLayout from "../layouts/SiteLayout.astro";
 import { awards, career, press } from "../data/about";
 
-const label = "text-[12px] font-medium uppercase leading-[14px] opacity-50 sm:text-[14px]";
-const statement =
-  "text-[22px] leading-[130%] tracking-[-0.03em] sm:text-[28px] sm:leading-[125%] lg:text-[32px] lg:leading-[120%]";
-const body = "text-[17px] leading-[150%] tracking-[-0.02em] sm:text-[20px]";
-const heading = "text-[36px] font-normal leading-[120%] tracking-[-0.03em] sm:text-[48px]";
+// Sizes come from the site's type scale (`global.css`).
+const label = "text-label font-medium uppercase opacity-50";
+const statement = "text-lead";
+const body = "text-body-lg tracking-[-0.02em]";
+const heading = "text-heading font-normal";
 const serif = "font-serif text-[1.08em] leading-none";
 const inlineLink = "underline decoration-1 underline-offset-4 transition-opacity hover:opacity-70";
 const scrollHref = "/projects/the-scroll-that-stole-time";
@@ -78,7 +78,7 @@ const nextLinks = [
           cast and no formal crew, which went on to win Best Essay Film at FICIMAD 2026 in Madrid. Proof that
           resourcefulness and a real point of view can travel further than a big budget.
         </p>
-        <p class="pt-4 font-serif text-[28px] leading-[120%] tracking-normal sm:text-[32px]">
+        <p class="pt-4 font-serif text-lead tracking-normal">
           Grounded in Story. Free in Imagination.
         </p>
       </div>
@@ -140,7 +140,7 @@ const nextLinks = [
     </div>
 
     <div class="mt-16 lg:mt-[120px]">
-      <h3 class="text-[20px] leading-[150%] tracking-[-0.03em]">Training &amp; career</h3>
+      <h3 class="text-body-lg">Training &amp; career</h3>
       <dl
         class="mt-4 grid gap-6 border border-night/10 bg-cream p-5 text-night sm:grid-cols-3 sm:gap-x-8 sm:p-8 lg:gap-x-16"
       >
@@ -148,11 +148,11 @@ const nextLinks = [
           career.map(({ label: name, lines, note }) => (
             <div class="flex flex-col items-start gap-2.5">
               <dt class={label}>[ {name} ]</dt>
-              <dd class="text-[17px] leading-[150%] tracking-[-0.03em] sm:text-[20px]">
+              <dd class="text-body-lg">
                 {lines.map((line) => (
                   <span class="block">{line}</span>
                 ))}
-                {note && <span class="mt-2 block text-[15px] opacity-70 sm:text-[16px]">{note}</span>}
+                {note && <span class="mt-2 block text-body opacity-70">{note}</span>}
               </dd>
             </div>
           ))
@@ -188,8 +188,8 @@ const nextLinks = [
             <li class="grid gap-3 border-t border-white/10 py-8 sm:grid-cols-[88px_minmax(0,1fr)] sm:gap-6">
               <p class:list={["sm:pt-[7px]", label]}>{year}</p>
               <div>
-                <h3 class="text-[20px] leading-[150%] tracking-[-0.03em] sm:text-[24px] sm:leading-[140%]">{title}</h3>
-                <p class="mt-2 text-[16px] leading-[150%] opacity-70">
+                <h3 class="text-title">{title}</h3>
+                <p class="mt-2 text-body opacity-70">
                   {from}
                   {forScroll && (
                     <>
@@ -198,7 +198,7 @@ const nextLinks = [
                     </>
                   )}
                 </p>
-                {note && <p class="mt-4 text-[16px] leading-[150%] opacity-70">{note}</p>}
+                {note && <p class="mt-4 text-body opacity-70">{note}</p>}
               </div>
             </li>
           ))
@@ -227,7 +227,7 @@ const nextLinks = [
               <a class="group flex items-start justify-between gap-6 py-6 sm:py-8" href={href} target="_blank" rel="noopener noreferrer">
                 <span class="flex flex-col gap-3">
                   <span class={label}>{outlet}</span>
-                  <span class="text-[20px] leading-[140%] tracking-[-0.03em] transition-opacity group-hover:opacity-70 sm:text-[24px]">
+                  <span class="text-title transition-opacity group-hover:opacity-70">
                     {headline}
                   </span>
                 </span>

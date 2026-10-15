@@ -60,8 +60,8 @@ const { title, image, facts } = Astro.props;
     {
       facts.map(({ label, lines }) => (
         <div class="flex flex-col items-start gap-2.5">
-          <dt class="text-[12px] font-medium uppercase leading-[14px] opacity-50 sm:text-[14px]">[ {label} ]</dt>
-          <dd class="text-[17px] leading-[150%] tracking-[-0.03em] sm:text-[20px]">
+          <dt class="text-label font-medium uppercase opacity-50">[ {label} ]</dt>
+          <dd class="text-body-lg">
             {lines.map((line, i) => (
               <>
                 {i > 0 && <br />}

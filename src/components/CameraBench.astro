@@ -61,24 +61,18 @@ const viewStyle = [
   `--blur:${lens.blur}px`,
 ].join(";");
 
-const caption = "text-[14px] font-medium uppercase leading-[15px] text-cream opacity-50";
-const readout =
-  "whitespace-nowrap text-[9px] font-medium uppercase leading-[13px] opacity-70 sm:text-[10px] sm:leading-[18px]";
+const caption = "text-label font-medium uppercase text-cream opacity-50";
+const readout = "whitespace-nowrap text-micro font-medium uppercase leading-[13px] opacity-70 sm:leading-[18px]";
 ---
 
 <section id="camera-bench" class="bg-cream px-4 pt-16 sm:px-16 sm:pt-24" aria-labelledby="bench-heading" data-bench>
   <div class="flex flex-col gap-6 bg-night/5 p-4 ring-1 ring-inset ring-white/10 sm:gap-8 sm:p-8">
     <header class="flex flex-col gap-6 text-black lg:flex-row lg:items-center lg:justify-between lg:gap-4">
       <div class="flex flex-col gap-4">
-        <p class="text-[14px] font-medium uppercase leading-[15px] opacity-50">( Interactive camera bench )</p>
-        <h2
-          id="bench-heading"
-          class="font-tight text-[36px] font-medium leading-[120%] tracking-[-0.03em] sm:text-[48px]"
-        >
-          Photography
-        </h2>
+        <p class="text-label font-medium uppercase opacity-50">( Interactive camera bench )</p>
+        <h2 id="bench-heading" class="font-tight text-heading font-medium">Photography</h2>
       </div>
-      <p class="max-w-[452px] text-[17px] leading-[150%] tracking-[-0.03em] sm:text-[20px]">
+      <p class="max-w-[452px] text-body-lg">
         Adjust our cinematic viewfinders and lens types in real-time. Test exposure levels, grain density, and
         monochrome silver matrix filters directly.
       </p>
@@ -148,7 +142,7 @@ const readout =
         </figure>
 
         <div class="flex flex-col gap-8 xl:min-w-[456px] xl:flex-[456_1_0%] xl:justify-between">
-          <h3 class="text-[20px] font-normal uppercase leading-[150%] tracking-[-0.03em] text-cream">
+          <h3 class="text-body-lg font-normal uppercase text-cream">
             Lens &amp; matrix controls
           </h3>
 
