@@ -1,6 +1,6 @@
 /**
- * Refraction for the site's glass capsules: the floating nav's links and the pills
- * over the project posters.
+ * Refraction for the floating nav's links capsule. (The project pills had it too,
+ * until its bright, bent rim read as a smeared ring over the posters' grain.)
  *
  * `refract(capsule)` builds an SVG lens for one capsule and redraws it whenever
  * the capsule changes size. Once the lens is drawn the capsule carries

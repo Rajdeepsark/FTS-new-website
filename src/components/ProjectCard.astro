@@ -131,7 +131,8 @@ const posterShape = wholeShape
   /* ---- Pill: the floating nav's glass, in its light tone -------------------------
      A blur, then a brightness squeeze that keeps the white lettering legible on any
      poster, then the colour put back; a 1px specular rim and an inner glow on top.
-     In Chromium the script swaps the blur for the refracting lens. */
+     Unlike the nav it has no refracting lens: over a poster's grain and lettering
+     the lens's brighter, bent rim read as a smeared ring around a darker middle. */
   .pill {
     --pill-tint: rgb(255 255 255 / 0);
     border-radius: 120px;
@@ -147,11 +148,6 @@ const posterShape = wholeShape
       opacity 0.3s ease,
       transform 0.5s cubic-bezier(0.3, 1.35, 0.45, 1),
       background-color 0.3s ease;
-  }
-
-  .pill[data-refract] {
-    -webkit-backdrop-filter: var(--glass-lens);
-    backdrop-filter: var(--glass-lens);
   }
 
   /* Specular rim: a 1px ring, lit from the top left and catching light again at the
@@ -213,8 +209,7 @@ const posterShape = wholeShape
   }
 
   @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-    .pill,
-    .pill[data-refract] {
+    .pill {
       background-color: #262523;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -233,11 +228,6 @@ const posterShape = wholeShape
 </style>
 
 <script>
-  import { refract } from "../scripts/glassLens";
-
-  // Each pill gets a lens for its glass (Chromium only; see the style block).
-  document.querySelectorAll<HTMLElement>("[data-project-pill]").forEach((pill) => refract(pill));
-
   const images = [...document.querySelectorAll<HTMLElement>("[data-parallax]")];
   const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
 
