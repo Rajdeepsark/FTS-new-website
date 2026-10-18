@@ -4,6 +4,7 @@
  * page of the studio's live site (flyingturtlestudio.in/films/, as of
  * 2026-10-17), and so are the stills, saved into `public/films/` at their
  * export size (about 1900px wide); each still's alt text was written for it.
+ * The featured film shows its release poster instead, from `public/projects/`.
  * To swap a still, replace the file keeping its name, or point `src` elsewhere.
  *
  * `youtubeId` is the film's public video: pressing the still opens it in the
@@ -45,11 +46,14 @@ export const featured: Film & { note: string; laurels: Laurel[] } = {
     "Aarav can’t stop scrolling, but the real problem isn’t the phone. It’s the quiet feeling that his time no longer belongs to him. A calm, unsettling short about attention in the modern world, shot on the streets and quiet corners of Guwahati.",
   note: "Currently in film festivals.",
   href: "/projects/the-scroll-that-stole-time",
+  // The release poster, the same file as the case study's hero (it replaced the
+  // live site's riverbank still on 2026-10-18). It carries lettering and the
+  // laurels, so the page shows it whole at 16:9.
   image: {
-    src: "/films/the-scroll-that-stole-time.jpg",
-    alt: "Still from The Scroll That Stole Time. Aarav sits on a riverbank in Guwahati at dusk in a patterned shirt, looking away from his phone across the water, in a cool teal grade.",
-    width: 1909,
-    height: 645,
+    src: "/projects/the-scroll-that-stole-time.jpg",
+    alt: "Poster for The Scroll That Stole Time: Phillips Neog lit by his phone, with the FICIMAD 2026 Best Essay Film and FICSAMAS 2025 Official Selection laurels",
+    width: 1600,
+    height: 900,
   },
   laurels: [
     { label: "Winner", title: "Best Essay Film", where: "FICIMAD 2026 · Madrid" },

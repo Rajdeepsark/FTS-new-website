@@ -6,13 +6,13 @@
  *
  *   intro      cream · "[ Filmography ]" over the heading, then the lede at the
  *              statement size (the project synopsis's 32/120% type)
- *   featured   night · The Scroll That Stole Time: the still full width at its
- *              own wide shape (4:3 on phones, the actor kept in frame), under it
+ *   featured   night · The Scroll That Stole Time: the release poster full width,
+ *              shown whole at 16:9, under it
  *              the year, title and credit beside the logline, the festival note,
  *              two laurels drawn like the project hero's facts panel, and a
  *              screener request (the case study's own, from `data/contact`)
  *   selected   cream · Selected Work: four films in two columns (`FilmCard`)
- *   more       white · More Work: five films as rows with a rule between them
+ *   more       white · More Work: five films in three columns (two from `sm`)
  *   closing    cream · one line on how the films are made, and two links set to
  *              the right edge like the footer's row, which follows on the same
  *              cream
@@ -82,7 +82,7 @@ const nextLinks = [
     <FilmStill
       film={featured}
       loading="eager"
-      class="aspect-[4/3] sm:aspect-video md:aspect-[1909/645] [&_img]:object-[62%_50%]"
+      class="aspect-video"
     />
 
     <div class="mt-8 grid gap-10 sm:mt-12 lg:mt-16 lg:grid-cols-2 lg:gap-16">
@@ -174,11 +174,11 @@ const nextLinks = [
       </p>
     </div>
 
-    <ul class="mt-12 border-b border-night/10 lg:mt-16">
+    <ul class="mt-12 grid gap-x-5 gap-y-10 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3 lg:gap-x-8">
       {
         more.map((film) => (
-          <li class="border-t border-night/10 py-8 sm:py-10">
-            <FilmCard film={film} variant="row" />
+          <li>
+            <FilmCard film={film} variant="compact" />
           </li>
         ))
       }

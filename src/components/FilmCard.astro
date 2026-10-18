@@ -3,14 +3,14 @@
  * One film on the Films page: its still (`FilmStill`) and, under or beside it,
  * the year, title, credit, logline and a "Watch on YouTube" link.
  *
- *   card   the still at 16:9 over the text: Selected Work's two-column grid
- *   row    from `md`, the still in the left two fifths beside the text: the
- *          More Work list, one film per row
+ *   card     the still at 16:9 over the text, the logline at 20px: Selected
+ *            Work's two-column grid
+ *   compact  the same with the logline at 16px: More Work's three-column grid
  *
  *   year     "[ 2022 ]"  Inter 500 · 14/14 · uppercase · 50%     (`text-label`)
  *   title    Inter 400 · 24/140% · -0.03em                        (`text-title`)
  *   credit   Inter 400 · 16/150% · 70%                            (`text-body`)
- *   logline  Inter 400 · 20/150% in a card, 16/150% in a row
+ *   logline  Inter 400 · 20/150% in a card, 16/150% compact
  *   link     underlined, then the "arrow outward", like the About page's links;
  *            it opens the film on YouTube in a new tab
  */
@@ -20,27 +20,22 @@ import FilmStill from "./FilmStill.astro";
 
 interface Props {
   film: Film;
-  variant?: "card" | "row";
+  variant?: "card" | "compact";
 }
 
 const { film, variant = "card" } = Astro.props;
 const { title, year, credit, logline, youtubeId } = film;
-const row = variant === "row";
+const compact = variant === "compact";
 ---
 
-<article
-  class:list={[
-    "flex flex-col gap-5",
-    row && "md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-start md:gap-8 lg:gap-16",
-  ]}
->
+<article class="flex flex-col gap-5">
   <FilmStill film={film} class="aspect-video" />
 
   <div class="flex flex-col items-start">
     <p class="text-label font-medium uppercase opacity-50">[ {year} ]</p>
     <h3 class="mt-3 text-title">{title}</h3>
     <p class="mt-1 text-body opacity-70">{credit}</p>
-    <p class:list={["mt-4 max-w-[36em]", row ? "text-body" : "text-body-lg tracking-[-0.02em]"]}>{logline}</p>
+    <p class:list={["mt-4 max-w-[36em]", compact ? "text-body" : "text-body-lg tracking-[-0.02em]"]}>{logline}</p>
     {
       youtubeId && (
         <a
