@@ -1,0 +1,309 @@
+---
+/**
+ * One project poster with its centred action pill and caption.
+ *
+ *   feature        full-width 1312 × 697 poster, caption laid over the bottom-left
+ *                  (below the poster on small screens), "Explore the film" pill
+ *   image-first    half-width card: 646 × 448 poster, caption underneath
+ *   caption-first  half-width card: caption on top, poster fills the rest of the row
+ *
+ * Below `md`, where the cards run in one column (see `WorkSection`), each card
+ * takes its place by project number and every caption sits under its poster.
+ *
+ * An `uncropped` project (an image with lettering of its own, like a release
+ * poster) is shown whole instead: the frame takes the image's shape at every
+ * width, the parallax below leaves it alone, and a feature caption sits under the
+ * poster rather than over it.
+ *
+ * Pill (Figma "Header"): padding 16px 32px · radius 120px · Inter 400 · 13/14 ·
+ * uppercase · white. "Watch" pills add a 16px play glyph. It is finished in the
+ * floating nav's glass (light tone; see the style block). Where there is a pointer
+ * to hover with, it shows only while the pointer is over the card or the pill
+ * has keyboard focus; touch screens keep it in view.
+ *
+ * The whole card, poster and caption, is clickable: a link with the pill's target
+ * covers it for the pointer (a press anywhere dips the pill). It is hidden from
+ * the keyboard and screen readers, for which the pill stays the one link.
+ *
+ * Scroll parallax, y axis only (skipped under prefers-reduced-motion and without
+ * JS): the image is zoomed 10% inside its frame and drops 6% of the frame height
+ * while the poster's centre is between 45% and 85% of the way up the screen (0% is
+ * the bottom edge, 100% the top). It eases in and out of that range, holds its end
+ * position outside it, and trails the scroll slightly so it glides to wherever the
+ * scroll puts it. The pill, gradient and caption stay put.
+ */
+import type { Project } from "../data/projects";
+import ProjectCaption from "./ProjectCaption.astro";
+
+interface Props {
+  project: Project;
+  variant: "feature" | "image-first" | "caption-first";
+}
+
+const { project, variant } = Astro.props;
+const { number, title, description, action, href, image, uncropped = false } = project;
+// Was "View case study" until the client asked for a different call to action.
+const label = action === "watch" ? "Watch" : "Explore the film";
+// Videos live on YouTube: open them in a new tab so the site stays where it was.
+const external = /^https?:\/\//.test(href);
+const linkTarget = external ? { target: "_blank", rel: "noopener noreferrer" } : {};
+
+// An uncropped image gives the frame its own shape, and a feature caption moves
+// off the poster.
+const wholeShape = uncropped && image?.width && image.height ? `aspect-ratio: ${image.width} / ${image.height}` : undefined;
+const overlay = variant === "feature" && !uncropped;
+
+const posterShape = wholeShape
+  ? ""
+  : {
+      feature: "aspect-[4/3] md:aspect-[1312/697]",
+      "image-first": "aspect-[646/448]",
+      "caption-first": "aspect-[646/418] md:aspect-auto md:min-h-0 md:flex-1",
+    }[variant];
+---
+
+<article
+  class:list={[
+    "card relative flex w-full flex-col max-md:order-[var(--order)]",
+    overlay && "md:isolate",
+    variant !== "feature" && "md:h-full",
+  ]}
+  style={`--order: ${Number(number)}`}
+>
+  {
+    variant === "caption-first" && (
+      <ProjectCaption number={number} description={description} class="max-md:order-last" />
+    )
+  }
+
+  <div class:list={["poster relative isolate w-full overflow-hidden bg-[#1a1917]", posterShape]} style={wholeShape}>
+    {
+      image ? (
+        <img
+          class="absolute inset-0 size-full object-cover will-change-transform"
+          src={image.src}
+          alt={image.alt}
+          width={image.width ?? (variant === "feature" ? 1312 : 646)}
+          height={image.height ?? (variant === "feature" ? 697 : 448)}
+          loading="lazy"
+          decoding="async"
+          data-parallax={uncropped ? undefined : true}
+        />
+      ) : (
+        <div
+          class="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,#2a2825_0%,#151413_70%)]"
+          aria-hidden="true"
+        />
+      )
+    }
+
+    {
+      overlay && (
+        <div
+          class="absolute inset-x-0 bottom-0 hidden h-1/2 bg-gradient-to-t from-black/60 to-transparent md:block"
+          aria-hidden="true"
+        />
+      )
+    }
+
+    <a
+      class="pill absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-3 whitespace-nowrap px-6 py-3 text-ui font-normal uppercase sm:px-8 sm:py-4"
+      href={href}
+      {...linkTarget}
+      aria-label={`${label}: ${title}${external ? " (opens in a new tab)" : ""}`}
+      data-project-pill
+    >
+      {
+        action === "watch" && (
+          <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M4.7 1.8C3.4 1 2.67 1.5 2.67 3v10c0 1.5.73 2 2.03 1.2l9-5.1c1.2-.7 1.2-1.5 0-2.2l-9-5.1Z" />
+          </svg>
+        )
+      }
+      <span class="pb-[5.71px] pt-[4.7px]">{label}</span>
+    </a>
+
+    {
+      overlay && (
+        <ProjectCaption
+          number={number}
+          description={description}
+          tone="white"
+          class="hidden md:absolute md:inset-x-0 md:bottom-0 md:flex"
+        />
+      )
+    }
+  </div>
+
+  {variant === "image-first" && <ProjectCaption number={number} description={description} />}
+  {variant === "feature" && <ProjectCaption number={number} description={description} class={overlay ? "md:hidden" : ""} />}
+
+  <a class="absolute inset-0 z-10" href={href} {...linkTarget} tabindex="-1" aria-hidden="true" />
+</article>
+
+<style>
+  /* ---- Pill: the floating nav's glass, in its light tone -------------------------
+     A blur, then a brightness squeeze that keeps the white lettering legible on any
+     poster, then the colour put back; a 1px specular rim and an inner glow on top.
+     Unlike the nav it has no refracting lens: over a poster's grain and lettering
+     the lens's brighter, bent rim read as a smeared ring around a darker middle. */
+  .pill {
+    --pill-tint: rgb(255 255 255 / 0);
+    border-radius: 120px;
+    background-color: var(--pill-tint);
+    -webkit-backdrop-filter: blur(16px) contrast(0.5) brightness(0.48) saturate(200%);
+    backdrop-filter: blur(16px) contrast(0.5) brightness(0.48) saturate(200%);
+    box-shadow:
+      0 12px 32px -12px rgb(0 0 0 / 0.5),
+      inset 0 1px 0 rgb(255 255 255 / 0.2),
+      inset 0 0 14px rgb(255 255 255 / 0.07);
+    color: #fff;
+    transition:
+      opacity 0.3s ease,
+      transform 0.5s cubic-bezier(0.3, 1.35, 0.45, 1),
+      background-color 0.3s ease;
+  }
+
+  /* Specular rim: a 1px ring, lit from the top left and catching light again at the
+     bottom right. The mask keeps only the ring of the gradient. */
+  .pill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      140deg,
+      rgb(255 255 255 / 0.6) 0%,
+      rgb(255 255 255 / 0.08) 30%,
+      rgb(255 255 255 / 0.08) 66%,
+      rgb(255 255 255 / 0.6) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+
+  /* ---- Reveal -------------------------------------------------------------------
+     Where there is a pointer to hover with, the pill waits for it to reach the
+     card, or for keyboard focus. Touch screens keep the pill in view. The cover
+     link takes the pointer, so hover and press are read off the card. */
+  @media (hover: hover) {
+    .pill {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+
+    .card:hover .pill,
+    .pill:focus-visible {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .card:active .pill {
+    transform: scale(0.96);
+  }
+
+  .pill:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* ---- Fallback: no backdrop-filter, or the visitor asked for a plainer screen -- */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .pill {
+      background-color: #262523;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    .pill {
+      background-color: #262523;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  /* The pill still fades in and out, but it does not grow or dip. */
+  @media (prefers-reduced-motion: reduce) {
+    .pill,
+    .card:hover .pill,
+    .card:active .pill {
+      transform: none;
+      transition: opacity 0.3s ease;
+    }
+  }
+</style>
+
+<script>
+  const images = [...document.querySelectorAll<HTMLElement>("[data-parallax]")];
+  const motion = window.matchMedia("(prefers-reduced-motion: no-preference)");
+
+  if (images.length) {
+    const ZOOM = 1.1;
+    // The stretch of the screen the slide runs over, as the height of the poster's
+    // centre (0 = bottom edge, 1 = top edge).
+    const FROM = 0.45;
+    const TO = 0.85;
+    // How far the image slides over it, in % of its frame. The zoom leaves ±5% of slack.
+    const TRAVEL = 6;
+    // Seconds the image takes to close about two thirds of the gap to where the
+    // scroll puts it, so a fast flick through the range glides instead of jumping.
+    const LAG = 0.18;
+
+    // Where each image sits now, in % of its frame (null until it is first placed).
+    const shown: (number | null)[] = images.map(() => null);
+    let running = false;
+    let last = 0;
+
+    const tick = (now: number) => {
+      const elapsed = last ? Math.min(now - last, 100) : 1000 / 60;
+      const pull = 1 - Math.exp(-elapsed / 1000 / LAG);
+      last = now;
+
+      let settled = true;
+      images.forEach((image, i) => {
+        const frame = image.parentElement?.getBoundingClientRect();
+        if (!motion.matches || !frame) {
+          image.style.removeProperty("transform");
+          shown[i] = null;
+          return;
+        }
+        const height = 1 - (frame.top + frame.height / 2) / window.innerHeight;
+        const t = Math.min(1, Math.max(0, (height - FROM) / (TO - FROM)));
+        const goal = (t * t * (3 - 2 * t) - 0.5) * TRAVEL; // smoothstep, centred on zero
+        const from = shown[i] ?? goal; // the first placement lands straight on the goal
+        const y = Math.abs(goal - from) < 0.01 ? goal : from + (goal - from) * pull;
+        if (y !== goal) settled = false;
+        shown[i] = y;
+        image.style.transform = `translateY(${y.toFixed(3)}%) scale(${ZOOM})`;
+      });
+
+      if (settled) {
+        running = false;
+        last = 0;
+      } else {
+        requestAnimationFrame(tick);
+      }
+    };
+
+    const schedule = () => {
+      if (!running) {
+        running = true;
+        requestAnimationFrame(tick);
+      }
+    };
+
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    motion.addEventListener("change", schedule);
+    running = true;
+    tick(performance.now());
+  }
+</script>
