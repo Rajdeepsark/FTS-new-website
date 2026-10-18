@@ -1,0 +1,66 @@
+---
+/**
+ * One film on the Films page: its still (`FilmStill`) and, under or beside it,
+ * the year, title, credit, logline and a "Watch on YouTube" link.
+ *
+ *   card   the still at 16:9 over the text: Selected Work's two-column grid
+ *   row    from `md`, the still in the left two fifths beside the text: the
+ *          More Work list, one film per row
+ *
+ *   year     "[ 2022 ]"  Inter 500 · 14/14 · uppercase · 50%     (`text-label`)
+ *   title    Inter 400 · 24/140% · -0.03em                        (`text-title`)
+ *   credit   Inter 400 · 16/150% · 70%                            (`text-body`)
+ *   logline  Inter 400 · 20/150% in a card, 16/150% in a row
+ *   link     underlined, then the "arrow outward", like the About page's links;
+ *            it opens the film on YouTube in a new tab
+ */
+import type { Film } from "../data/films";
+import { watchUrl } from "../data/films";
+import FilmStill from "./FilmStill.astro";
+
+interface Props {
+  film: Film;
+  variant?: "card" | "row";
+}
+
+const { film, variant = "card" } = Astro.props;
+const { title, year, credit, logline, youtubeId } = film;
+const row = variant === "row";
+---
+
+<article
+  class:list={[
+    "flex flex-col gap-5",
+    row && "md:grid md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-start md:gap-8 lg:gap-16",
+  ]}
+>
+  <FilmStill film={film} class="aspect-video" />
+
+  <div class="flex flex-col items-start">
+    <p class="text-label font-medium uppercase opacity-50">[ {year} ]</p>
+    <h3 class="mt-3 text-title">{title}</h3>
+    <p class="mt-1 text-body opacity-70">{credit}</p>
+    <p class:list={["mt-4 max-w-[36em]", row ? "text-body" : "text-body-lg tracking-[-0.02em]"]}>{logline}</p>
+    {
+      youtubeId && (
+        <a
+          class="group mt-5 inline-flex items-start text-body"
+          href={watchUrl(youtubeId)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="underline underline-offset-[0.19em] [text-decoration-thickness:0.07em]">Watch on YouTube</span>
+          <svg
+            class="size-[1.343em] shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6z" />
+          </svg>
+          <span class="sr-only">(opens in a new tab)</span>
+        </a>
+      )
+    }
+  </div>
+</article>

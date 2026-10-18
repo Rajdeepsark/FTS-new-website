@@ -1,0 +1,182 @@
+---
+/**
+ * One film's still with its "Watch" pill, for the Films page.
+ *
+ *   frame   the still, cover-fitted; `class` sets the frame's shape. Where there
+ *           is a pointer to hover with, the still zooms 3% under it
+ *   pill    centred and always in view: the floating nav's glass in its light
+ *           tone (see the style block) · padding 16px 32px · radius 120px ·
+ *           Inter 400 · 13/14 · uppercase · white, a 16px play glyph in front
+ *           of "Watch"
+ *
+ * A film with a public video (`youtubeId`) opens in the page's `FilmLightbox`
+ * when the still or the pill is pressed (the lightbox's script reads
+ * `data-film-play`); without JS the same press opens the video on YouTube in a
+ * new tab. A film without one, still in festivals, leads to `href` instead,
+ * under "Explore the film", the homepage's old call to action.
+ *
+ * The whole still is clickable: a cover link takes the pointer, hidden from the
+ * keyboard and screen readers, for which the pill is the one link.
+ *
+ * A 1px ring at 8% black sits inside the frame's edge, so a still that is mostly
+ * white (a title card on a white ground) keeps an edge on the page's white band;
+ * on a dark still it disappears.
+ */
+import type { Film } from "../data/films";
+import { watchUrl } from "../data/films";
+
+interface Props {
+  film: Film;
+  /** The frame's shape, and anything else for the wrapper. */
+  class?: string;
+  /** "eager" for a still above the fold. */
+  loading?: "eager" | "lazy";
+}
+
+const { film, class: className = "", loading = "lazy" } = Astro.props;
+const { title, youtubeId, href, image } = film;
+
+const target = youtubeId ? watchUrl(youtubeId) : (href ?? "#");
+const label = youtubeId ? "Watch" : "Explore the film";
+const linkAttrs = youtubeId ? { target: "_blank", rel: "noopener noreferrer" } : {};
+const play = youtubeId ? { "data-film-play": youtubeId, "data-film-title": title } : {};
+---
+
+<div
+  class:list={[
+    "still relative isolate w-full overflow-hidden bg-[#1a1917] after:pointer-events-none after:absolute after:inset-0 after:ring-1 after:ring-inset after:ring-black/8 after:content-['']",
+    className,
+  ]}
+>
+  <img
+    class="absolute inset-0 size-full object-cover"
+    src={image.src}
+    alt={image.alt}
+    width={image.width}
+    height={image.height}
+    loading={loading}
+    fetchpriority={loading === "eager" ? "high" : undefined}
+    decoding="async"
+  />
+
+  <a
+    class="pill absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-3 whitespace-nowrap px-6 py-3 text-ui font-normal uppercase sm:px-8 sm:py-4"
+    href={target}
+    {...linkAttrs}
+    {...play}
+    aria-label={`${label}: ${title}`}
+  >
+    {
+      youtubeId && (
+        <svg class="size-4 shrink-0" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M4.7 1.8C3.4 1 2.67 1.5 2.67 3v10c0 1.5.73 2 2.03 1.2l9-5.1c1.2-.7 1.2-1.5 0-2.2l-9-5.1Z" />
+        </svg>
+      )
+    }
+    <span class="pb-[5.71px] pt-[4.7px]">{label}</span>
+  </a>
+
+  <a class="absolute inset-0 z-10" href={target} {...linkAttrs} {...play} tabindex="-1" aria-hidden="true"></a>
+</div>
+
+<style>
+  /* ---- Pill: the floating nav's glass, in its light tone -------------------------
+     A blur, then a brightness squeeze that keeps the white lettering legible on any
+     still, then the colour put back; a 1px specular rim and an inner glow on top.
+     No refracting lens: over a still's grain and lettering its bent rim reads as a
+     smeared ring. */
+  .pill {
+    --pill-tint: rgb(255 255 255 / 0);
+    border-radius: 120px;
+    background-color: var(--pill-tint);
+    -webkit-backdrop-filter: blur(16px) contrast(0.5) brightness(0.48) saturate(200%);
+    backdrop-filter: blur(16px) contrast(0.5) brightness(0.48) saturate(200%);
+    box-shadow:
+      0 12px 32px -12px rgb(0 0 0 / 0.5),
+      inset 0 1px 0 rgb(255 255 255 / 0.2),
+      inset 0 0 14px rgb(255 255 255 / 0.07);
+    color: #fff;
+    transition:
+      transform 0.4s cubic-bezier(0.3, 1.5, 0.5, 1),
+      background-color 0.3s ease;
+  }
+
+  /* Specular rim: a 1px ring, lit from the top left and catching light again at the
+     bottom right. The mask keeps only the ring of the gradient. */
+  .pill::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(
+      140deg,
+      rgb(255 255 255 / 0.6) 0%,
+      rgb(255 255 255 / 0.08) 30%,
+      rgb(255 255 255 / 0.08) 66%,
+      rgb(255 255 255 / 0.6) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+
+  /* ---- Touch ---------------------------------------------------------------------
+     The cover link takes the pointer, so hover and press are read off the frame. */
+  .still img {
+    transition: transform 0.6s ease;
+  }
+
+  @media (hover: hover) {
+    .still:hover img {
+      transform: scale(1.03);
+    }
+
+    .still:hover .pill {
+      --pill-tint: rgb(255 255 255 / 0.08);
+      transform: scale(1.04);
+    }
+  }
+
+  .still:active .pill {
+    transform: scale(0.96);
+  }
+
+  .pill:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* ---- Fallback: no backdrop-filter, or the visitor asked for a plainer screen -- */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .pill {
+      background-color: #262523;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    .pill {
+      background-color: #262523;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .still img,
+    .pill {
+      transition: none;
+    }
+
+    .still:hover img,
+    .still:hover .pill,
+    .still:active .pill {
+      transform: none;
+    }
+  }
+</style>

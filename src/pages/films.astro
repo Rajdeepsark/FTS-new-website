@@ -1,0 +1,223 @@
+---
+/**
+ * Films page: the studio's filmography, with the copy of the live site's Films
+ * page (flyingturtlestudio.in/films/). There is no Figma frame for it, so like
+ * the About page it borrows the site's type and pieces:
+ *
+ *   intro      cream · "[ Filmography ]" over the heading, then the lede at the
+ *              statement size (the project synopsis's 32/120% type)
+ *   featured   night · The Scroll That Stole Time: the still full width at its
+ *              own wide shape (4:3 on phones, the actor kept in frame), under it
+ *              the year, title and credit beside the logline, the festival note,
+ *              two laurels drawn like the project hero's facts panel, and a
+ *              screener request (the case study's own, from `data/contact`)
+ *   selected   cream · Selected Work: four films in two columns (`FilmCard`)
+ *   more       white · More Work: five films as rows with a rule between them
+ *   closing    cream · one line on how the films are made, and two links set to
+ *              the right edge like the footer's row, which follows on the same
+ *              cream
+ *   lightbox   `FilmLightbox`, opened by any still with a public video
+ *
+ * Every heading is the homepage's, the `heading` type size (48/120% · -0.03em),
+ * with the serif run at 1.08em; section labels are "[ … ]" as on the About page,
+ * and the two list sections are labelled with the years their films span.
+ * Film data lives in `src/data/films.ts`.
+ */
+import SiteLayout from "../layouts/SiteLayout.astro";
+import FilmStill from "../components/FilmStill.astro";
+import FilmCard from "../components/FilmCard.astro";
+import FilmLightbox from "../components/FilmLightbox.astro";
+import { featured, more, selected, type Film } from "../data/films";
+import { mailto } from "../data/contact";
+
+// Sizes come from the site's type scale (`global.css`).
+const label = "text-label font-medium uppercase opacity-50";
+const statement = "text-lead";
+const heading = "text-heading font-normal";
+const serif = "font-serif text-[1.08em] leading-none";
+const arrow = "M6 6v2h8.59L5 17.59 6.41 19 16 9.41V18h2V6z";
+
+/** "2022–2025": the first and last year among the films. */
+const span = (films: Film[]) => {
+  const years = films.map(({ year }) => parseInt(year, 10));
+  return `${Math.min(...years)}–${Math.max(...years)}`;
+};
+
+// The same request as on the film's case study page.
+const screener = mailto(
+  "Private screener request - The Scroll That Stole Time",
+  "Hi Kaushik, I’d like to request a private screener of The Scroll That Stole Time. - [your name]",
+);
+
+const nextLinks = [
+  { href: "/#services", label: "See the services" },
+  { href: "/about", label: "About Kaushik Sharma" },
+];
+---
+
+<SiteLayout
+  title="Films"
+  description="Ten films from Guwahati, Assam, by Flying Turtle Studio: essay films, documentaries for the Balipara Foundation, festival work in Majuli, and campaign films made in New Zealand."
+>
+  <section
+    class="bg-cream px-4 pb-16 pt-32 text-night sm:px-8 sm:pb-20 sm:pt-40 lg:px-16 lg:pb-24 lg:pt-[184px]"
+    aria-labelledby="films-heading"
+  >
+    <p class={label}>[ Filmography ]</p>
+    <h1 id="films-heading" class:list={["mt-3", heading]}>
+      <span class={serif}>Films</span>
+    </h1>
+    <p class:list={["mt-8 max-w-[32em] sm:mt-10", statement]}>
+      Flying Turtle Studio has made ten films from Guwahati, Assam. Essay films, documentaries for the Balipara
+      Foundation, festival work in Majuli, and campaign films made in New Zealand. Kaushik Sharma writes, shoots,
+      directs and edits most of them himself.
+    </p>
+  </section>
+
+  <section
+    class="bg-night px-4 py-16 text-cream sm:px-8 sm:py-24 lg:px-16 lg:py-[120px]"
+    aria-labelledby="featured-heading"
+    data-nav-tone="light"
+  >
+    <FilmStill
+      film={featured}
+      loading="eager"
+      class="aspect-[4/3] sm:aspect-video md:aspect-[1909/645] [&_img]:object-[62%_50%]"
+    />
+
+    <div class="mt-8 grid gap-10 sm:mt-12 lg:mt-16 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <p class={label}>[ {featured.year} ]</p>
+        <h2 id="featured-heading" class:list={["mt-3", heading]}>
+          The Scroll That<br />
+          <span class={serif}>Stole Time</span>
+        </h2>
+        <p class="mt-5 max-w-[24em] text-body-lg opacity-70">{featured.credit}</p>
+      </div>
+
+      <div class="flex flex-col items-start">
+        <p class={statement}>{featured.logline}</p>
+        <p class="mt-6 text-body-lg opacity-70">{featured.note}</p>
+
+        <ul class="mt-8 grid w-full gap-4 sm:grid-cols-2" aria-label="Festival recognition">
+          {
+            featured.laurels.map(({ label: kind, title, where }) => (
+              <li class="border border-white/10 p-5 sm:p-6">
+                <p class={label}>[ {kind} ]</p>
+                <p class="mt-3 text-title">{title}</p>
+                <p class="mt-1 text-body opacity-70">{where}</p>
+              </li>
+            ))
+          }
+        </ul>
+
+        <a class="group mt-8 inline-flex items-start text-body-lg" href={screener}>
+          <span class="underline underline-offset-[0.19em] [text-decoration-thickness:0.07em]">
+            Request a private screener
+          </span>
+          <svg
+            class="size-[1.343em] shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d={arrow}></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section
+    id="selected-work"
+    class="bg-cream px-4 py-16 text-night sm:px-8 sm:py-24 lg:px-16 lg:py-[120px]"
+    aria-labelledby="selected-heading"
+  >
+    <div class="grid gap-8 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <p class={label}>[ {span(selected)} ]</p>
+        <h2 id="selected-heading" class:list={["mt-3", heading]}>
+          Selected <span class={serif}>Work</span>
+        </h2>
+      </div>
+      <p class:list={["lg:pt-[calc(var(--text-label)+0.75rem)]", statement]}>
+        Documentaries made for the Balipara Foundation across Northeast India, and two films from the Majuli Music
+        Festival on the river island.
+      </p>
+    </div>
+
+    <ul class="mt-12 grid gap-x-5 gap-y-12 md:grid-cols-2 lg:mt-16 lg:gap-x-8">
+      {
+        selected.map((film) => (
+          <li>
+            <FilmCard film={film} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section
+    id="more-work"
+    class="bg-white px-4 py-16 text-night sm:px-8 sm:py-24 lg:px-16 lg:py-[120px]"
+    aria-labelledby="more-heading"
+  >
+    <div class="grid gap-8 lg:grid-cols-2 lg:gap-16">
+      <div>
+        <p class={label}>[ {span(more)} ]</p>
+        <h2 id="more-heading" class:list={["mt-3", heading]}>
+          More <span class={serif}>Work</span>
+        </h2>
+      </div>
+      <p class:list={["lg:pt-[calc(var(--text-label)+0.75rem)]", statement]}>
+        Campaign films, student-era productions from Wintec in New Zealand, and a motorcycle ride through Meghalaya.
+      </p>
+    </div>
+
+    <ul class="mt-12 border-b border-night/10 lg:mt-16">
+      {
+        more.map((film) => (
+          <li class="border-t border-night/10 py-8 sm:py-10">
+            <FilmCard film={film} variant="row" />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section
+    class="bg-cream px-4 py-16 text-night sm:px-8 sm:py-24 lg:px-16 lg:py-[120px]"
+    aria-label="How the films are made"
+  >
+    <!-- Laid out like the footer's row under it: the line on the left at the
+         footer's measure, the links pushed to the right edge. -->
+    <div class="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
+      <p class:list={["lg:max-w-[21.85em]", statement]}>
+        These films are made with the same services offered to clients: writing, camera and drone, edit, grade and
+        sound, all in-house.
+      </p>
+
+      <ul class="flex shrink-0 flex-col items-start gap-4">
+        {
+          nextLinks.map(({ href, label: text }) => (
+            <li>
+              <a class:list={["group inline-flex items-start", statement]} href={href}>
+                <span class="underline underline-offset-[0.19em] [text-decoration-thickness:0.07em]">{text}</span>
+                <svg
+                  class="size-[1.2em] shrink-0 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d={arrow} />
+                </svg>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <FilmLightbox />
+</SiteLayout>

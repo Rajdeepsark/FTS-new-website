@@ -17,7 +17,7 @@
  *                                       then a 43px arrow (Material "arrow outward")
  *   bar         72px · padding 16px 64px · white at 10% · space-between
  *               links 13/14 uppercase · gap 24px · a 5px dot centred between
- *               PROJECTS, SERVICES and ABOUT, level with the lettering (as in the nav)
+ *               FILMS, SERVICES and ABOUT, level with the lettering (as in the nav)
  *               copyright 16/20, centred, 214px (two lines)
  *               credit 16/20, right-aligned; the two side blocks are both 411px
  *               in Figma, here two equal grid columns, which centres the copyright
@@ -45,8 +45,8 @@
  * to it (`#contact`), and there is no separate contact page.
  *
  * Not from Figma: the copyright year is the current year (the design says 2024),
- * and the link targets. The links match the floating nav's: Projects and Services
- * go to those homepage sections, About to its page. Instagram is the profile the
+ * and the link targets. The links match the floating nav's: Films and About go to
+ * their own pages, Services to the homepage section. Instagram is the profile the
  * studio's live site links to; the YouTube channel is the one that published the
  * studio's films.
  */
@@ -63,7 +63,7 @@ interface FooterLink {
 }
 
 const links: FooterLink[] = [
-  { href: "/#work", label: "Projects" },
+  { href: "/films", label: "Films" },
   { href: "/#services", label: "Services", dot: true },
   { href: "/about", label: "About", dot: true },
   { href: "https://www.instagram.com/flying_turtle_studio/", label: "Instagram", external: true },

@@ -17,8 +17,8 @@
  *               wherever the phone row would not fit (about 9px type on a 280px
  *               screen); the row never wraps
  *
- * Where they go: Projects and Services scroll to those homepage sections (from any
- * other page they open the homepage there), About is its own page, and Talk to us
+ * Where they go: Films and About are their own pages, Services scrolls to that
+ * homepage section (from any other page it opens the homepage there), and Talk to us
  * scrolls down to the footer (`#contact`), which is on every page; there is no
  * separate contact page. Lenis (see `SiteLayout`) makes the in-page scrolls smooth.
  *
@@ -48,7 +48,7 @@
 const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 // `dot`: the separator dot in front of the link.
 const links = [
-  { href: "/#work", label: "Projects", dot: false },
+  { href: "/films", label: "Films", dot: false },
   { href: "/#services", label: "Services", dot: true },
   { href: "/about", label: "About", dot: true },
 ];
