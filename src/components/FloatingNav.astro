@@ -5,8 +5,10 @@
  *
  *   navigation  row · gap 6px · 32px from the bottom edge (20px on phones)
  *   links       glass capsule · padding 16px 14px · radius 120px · each link padded
- *               10px a side, links 20px apart (the capsule is as wide as the
- *               design's 26px padding with 6px links; the room moved onto the links)
+ *               12px a side, links 28px apart (the design had 26px capsule padding,
+ *               6px link padding and 20px between links; the room moved onto the
+ *               links, and both were widened on 2026-10-18 so the lozenge has more
+ *               air around the current page's name: 21.5px a side instead of 15.5px)
  *               Inter 400 · 13/14 (the `ui` type size) · uppercase · a 5 × 5 dot
  *               centred between each pair of links, level with the lettering
  *   Talk to us  prominent glass capsule: white-tinted, #000 label · padding 16px 32px
@@ -169,8 +171,8 @@ const links = [
 
   @media (width >= 40rem) {
     nav {
-      --gap: calc(20 * var(--u));
-      --pad: calc(10 * var(--u));
+      --gap: calc(28 * var(--u));
+      --pad: calc(12 * var(--u));
     }
 
     .links {
