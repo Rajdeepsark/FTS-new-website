@@ -5,11 +5,16 @@
  *   0. Gemini_Generated_Image … / upscale_image [Upscaled].png
  *      1667.6 × 774.4 at 1440 wide, centred, anchored to the bottom,
  *      mix-blend-mode: darken — its white areas dissolve into the page.
- *   1. Container › Frame 1 (407px, gap 12px)
- *      ( WE )   Inter 500 · 14/14 · uppercase · #000
- *      Heading  Inter 400 · 48/120% · -0.03em · centred · #000
- *               ("films and visuals." is set in the serif face per the design screenshot;
- *               Figma's CSS export only carries the first text run's font)
+ *   1. Container › Frame 1 (407px in Figma, gap 12px)
+ *      ( WE ARE )  Inter 500 · 14/14 · uppercase · #000
+ *      Heading     Inter 400 · 48/120% · -0.03em · centred · #000
+ *                  The copy is the studio's own line, "An independent film & video
+ *                  production studio in Guwahati, Assam." (changed 2026-10-18 from
+ *                  the design's "Help brands craft unique — films and visuals."),
+ *                  with the place name in the serif face on its own line, as the
+ *                  design set its last run. The block is widened to 600px so the
+ *                  longer line sits in three rows at 1440; the lines are balanced
+ *                  and "studio in" never breaks, so no word is left alone on a row.
  *
  * Layer 2 (the bottom navigation) is rendered site-wide by FloatingNav.astro;
  * `data-nav-tone="light"` tells it to switch to the Figma white styling while it
@@ -67,11 +72,11 @@
     </video>
   </div>
 
-  <div class="z-10 flex w-full max-w-[407px] flex-col items-center gap-3 text-center text-black">
-    <p class="pb-[5.71px] pt-[4.7px] text-label font-medium uppercase">( We )</p>
-    <h1 id="hero-heading" class="text-heading font-normal">
-      Help brands craft unique —
-      <span class="font-serif text-[1.08em] leading-none">films and visuals.</span>
+  <div class="z-10 flex w-full max-w-[600px] flex-col items-center gap-3 text-center text-black">
+    <p class="pb-[5.71px] pt-[4.7px] text-label font-medium uppercase">( We are )</p>
+    <h1 id="hero-heading" class="text-balance text-heading font-normal">
+      An independent film &amp; video production studio&nbsp;in<br />
+      <span class="font-serif text-[1.08em] leading-none">Guwahati, Assam.</span>
     </h1>
   </div>
 </section>
